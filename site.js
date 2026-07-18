@@ -214,7 +214,7 @@
     const interests = (p.ri || []).filter(Boolean).join(', ');
     const edu = (p.education || []).filter(Boolean);
     const face = p.img
-      ? '<img src="images/members/' + u(p.img) + '" alt="' + (p.en || p.ko) + '" onerror="this.remove()">'
+      ? '<img loading="lazy" src="images/members/' + u(p.img) + '" alt="' + (p.en || p.ko) + '" onerror="this.remove()">'
       : (p.init || '');
     const nameLine = p.en
       ? p.en + ' <span class="card-person__ko">(' + p.ko + ')</span>'
@@ -250,7 +250,7 @@
     const interests = (p.ri || []).filter(Boolean).join(', ');
     const edu = (p.education || []).filter(Boolean);
     const face = p.img
-      ? '<img src="images/members/' + u(p.img) + '" alt="' + (p.en || p.ko) + '" onerror="this.remove()">'
+      ? '<img loading="lazy" src="images/members/' + u(p.img) + '" alt="' + (p.en || p.ko) + '" onerror="this.remove()">'
       : (p.init || '');
     const nameLine = p.en
       ? p.en + ' <span class="card-postdoc__ko">(' + p.ko + ')</span>'
@@ -327,7 +327,7 @@
     if (!m) return;
     const photoBase = 'images/members/';
     const face = '<div class="bio-photo" style="background:' + m._bg + '">' +
-      (m.img ? '<img src="' + photoBase + u(m.img) + '" alt="' + (m.en || m.ko) + '" onerror="this.remove()">' : '') +
+      (m.img ? '<img loading="lazy" src="' + photoBase + u(m.img) + '" alt="' + (m.en || m.ko) + '" onerror="this.remove()">' : '') +
       (m.init || '') + '</div>';
     const tags = (m.ri || []).filter(Boolean).map(t => '<span class="tag">' + t + '</span>').join('');
     const lines = [];
@@ -404,12 +404,12 @@
 
     const body = (n.blocks || []).map(b => {
       if (b.p) return '<p>' + noteHTML(b.p) + '</p>';
-      if (b.img) return '<figure><div class="frame"><img src="' + mediaBase + u(b.img) + '" alt="" onerror="this.parentElement.classList.add(\'is-empty\');this.remove()"></div><figcaption>' + (b.cap || '') + '</figcaption></figure>';
+      if (b.img) return '<figure><div class="frame"><img loading="lazy" src="' + mediaBase + u(b.img) + '" alt="" onerror="this.parentElement.classList.add(\'is-empty\');this.remove()"></div><figcaption>' + (b.cap || '') + '</figcaption></figure>';
       return '';
     }).join('');
 
     const hero = n.hero
-      ? '<div class="frame"><img src="' + mediaBase + u(n.hero) + '" alt="" onerror="this.parentElement.classList.add(\'is-empty\');this.remove()"></div>'
+      ? '<div class="frame"><img loading="lazy" src="' + mediaBase + u(n.hero) + '" alt="" onerror="this.parentElement.classList.add(\'is-empty\');this.remove()"></div>'
       : '';
     const external = n.link && n.link.indexOf('mailto:') !== 0;
     const cta = n.link
@@ -438,7 +438,7 @@
   function thumb(folder, hero) {
     const icon = '<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.8"/><path d="M21 15l-5-5L5 21"/></svg>';
     if (hero) {
-      return '<div class="media-card__thumb"><img src="images/' + folder + '/' + u(hero) + '" alt="" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.innerHTML=\'' + icon.replace(/'/g, '&#39;').replace(/"/g, '&quot;') + '\'"></div>';
+      return '<div class="media-card__thumb"><img loading="lazy" src="images/' + folder + '/' + u(hero) + '" alt="" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.innerHTML=\'' + icon.replace(/'/g, '&#39;').replace(/"/g, '&quot;') + '\'"></div>';
     }
     return '<div class="media-card__thumb">' + icon + '</div>';
   }
@@ -554,7 +554,7 @@
     const cite = p.cite ? ' <span class="pv-c">' + p.cite + '</span>' : '';
     const coverSrc = p.cover ? 'images/covers/' + (/\.[a-z0-9]+$/i.test(p.cover) ? p.cover : p.cover + '.png') : '';
     const cover = coverSrc
-      ? '<div class="paper__cover"><img src="' + coverSrc + '" alt="Cover" onerror="this.remove()"></div>'
+      ? '<div class="paper__cover"><img loading="lazy" src="' + coverSrc + '" alt="Cover" onerror="this.remove()"></div>'
       : '';
     return '<div class="paper rise' + (coverSrc ? ' paper--cover' : '') + '"><div class="paper__meta">' + p.y + stateBadge(p.state) + '</div>' +
       '<div class="paper__main"><div class="paper__titleline">' + titleEl + revTag + '</div>' +
@@ -944,7 +944,7 @@
     mount.innerHTML = researchData.map(a =>
       '<article class="rcard rise" data-research="' + u(a.id) + '">' +
         '<div class="rcard__media">' +
-          (a.img ? '<img src="images/research/' + u(a.img) + '" alt="" onerror="this.parentElement.classList.add(\'is-empty\');this.remove()">' : '') +
+          (a.img ? '<img loading="lazy" src="images/research/' + u(a.img) + '" alt="" onerror="this.parentElement.classList.add(\'is-empty\');this.remove()">' : '') +
         '</div>' +
         '<h3 class="rcard__title">' + richInline(a.title || '') + '</h3>' +
         '<span class="rcard__more">See More</span>' +
@@ -961,7 +961,7 @@
     mount.innerHTML = researchData.map(a =>
       '<article class="rcard rcard--home rise" data-research="' + u(a.id) + '">' +
         '<div class="rcard__media">' +
-          (a.img ? '<img src="images/research/' + u(a.img) + '" alt="" onerror="this.parentElement.classList.add(\'is-empty\');this.remove()">' : '') +
+          (a.img ? '<img loading="lazy" src="images/research/' + u(a.img) + '" alt="" onerror="this.parentElement.classList.add(\'is-empty\');this.remove()">' : '') +
           '<span class="rcard__link">' + RES_LINK_ICON + '</span>' +
         '</div>' +
         '<h3 class="rcard__title">' + richInline(a.title || '') + '</h3>' +
@@ -974,12 +974,12 @@
     if (!a) return;
     const base = 'images/research/';
     const img = a.img
-      ? '<div class="rdetail__media"><img src="' + base + u(a.img) + '" alt="" onerror="this.parentElement.classList.add(\'is-empty\');this.remove()"></div>'
+      ? '<div class="rdetail__media"><img loading="lazy" src="' + base + u(a.img) + '" alt="" onerror="this.parentElement.classList.add(\'is-empty\');this.remove()"></div>'
       : '<div class="rdetail__media is-empty"></div>';
     const body = (a.blocks || []).map(b => {
       if (b.h) return '<h2 class="entry__h">' + richInline(b.h) + '</h2>';
       if (b.p) return '<p>' + noteHTML(b.p) + '</p>';
-      if (b.img) return '<figure><div class="frame"><img src="' + base + u(b.img) + '" alt="" onerror="this.parentElement.classList.add(\'is-empty\');this.remove()"></div><figcaption>' + (b.cap || '') + '</figcaption></figure>';
+      if (b.img) return '<figure><div class="frame"><img loading="lazy" src="' + base + u(b.img) + '" alt="" onerror="this.parentElement.classList.add(\'is-empty\');this.remove()"></div><figcaption>' + (b.cap || '') + '</figcaption></figure>';
       return '';
     }).join('');
 
@@ -1047,7 +1047,7 @@
     if (!pr.f) return '';
     const name = partnerLogos[pr.f] || pr.f;
     const b = 'images/partners/' + encodeURIComponent(name);
-    return '<img class="fund-logo" src="' + b + '.png" data-base="' + b + '" alt="' + pr.f + '" onerror="neoFundErr(this)">';
+    return '<img class="fund-logo" loading="lazy" src="' + b + '.png" data-base="' + b + '" alt="' + pr.f + '" onerror="neoFundErr(this)">';
   }
   function projectRowHTML(pr) {
     const st = projectStatus(pr.p);
@@ -1160,5 +1160,7 @@
     revealPass();
   }
 
+  /* 데이터 로딩과 무관하게, 정적 콘텐츠(히어로·섹션 제목)를 즉시 표시 */
+  revealPass();
   boot();
 })();
