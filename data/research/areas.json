@@ -1,0 +1,38 @@
+[
+  {
+    "id": "process",
+    "title": "Logic Devices",
+    "sub": "2차원 물질의 합성·전사부터 도핑·접합 제어까지, 차세대 소자를 위한 공정 기술을 개발합니다.",
+    "img": "Logic.jpg",
+    "keywords": ["로직소자"],
+    "blocks": [
+      { "p": "Two-dimensional (2D) semiconductors offer atomically thin bodies, dangling-bond-free surfaces, and superior electrostatic control, making them compelling channel materials for aggressively scaled logic devices beyond the limits of silicon." },
+      { "p": "Turning these intrinsic materials into reliable logic building blocks, however, demands precise control over how many carriers the channel holds, how efficiently carriers are injected, how strongly the gate couples to the channel, and how the device polarity is defined." },
+      { "p": "Our research pursues this goal through four complementary levers — doping, contact, dielectric, and polarity engineering — that together bridge the gap between pristine 2D materials and manufacturable, high-performance logic transistors." }
+    ]
+  },
+  {
+    "id": "ai-semiconductor",
+    "title": "Optoelectronic Devices",
+    "sub": "시냅스·뉴런을 모방하는 뉴로모픽·광시냅스 소자로 차세대 AI 반도체를 구현합니다.",
+    "img": "optoelectronics.png",
+    "keywords": ["광센서"],
+    "blocks": [
+      { "p": "Van der Waals (vdW) heterostructures assembled from dissimilar two-dimensional materials provide an exceptionally versatile platform for optoelectronic devices, where atomically sharp interfaces, tunable band alignments, and strong light–matter interaction can be combined free from lattice-matching constraints. " },
+      { "p": "By stacking materials with complementary optical and electronic properties and controlling their interlayer coupling with electrostatic gating, we design devices whose photoresponse can be programmed, accelerated, and amplified." },
+      { "p": "Our research exploits these degrees of freedom to develop three device concepts: gate-tunable bidirectional photodetectors, ultrafast optoelectronic memories, and mid-infrared avalanche photodetectors." }
+    ]
+  },
+  {
+    "id": "system-ai",
+    "title": "System-level AI Hardware",
+    "sub": "인-센서 컴퓨팅과 스파이킹 신경망 하드웨어로 AI 반도체를 시스템 수준에서 실증합니다.",
+    "img": "in-sensor.png",
+    "keywords": ["인센서컴퓨팅"],
+    "blocks": [
+      { "p": "The emergence of Physical AI is driving the need for sensory neuromorphic systems that emulate the human senses." },
+      { "p": "In biological perception, sensing, memory, and computation are tightly intertwined at the point of stimulus, whereas conventional hardware keeps sensors, memory, and processors separate and pays a heavy latency and energy cost for constantly shuttling raw data between them." },
+      { "p": "Among the five senses, we focus on emulating vision by developing in-sensor computing technologies that process and compute data directly within the sensor.  Our goal is energy-efficient, low-latency machine vision that brings brain-inspired perception to edge devices and Physical AI platforms." }
+    ]
+  }
+]

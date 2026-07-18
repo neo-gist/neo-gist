@@ -1,0 +1,12 @@
+{
+  "id": "2025-11-12-af-synapse",
+  "posted": "2025-11-12",
+  "term": "Paper Published",
+  "title": "GIST-경북대, 하나의 소자만으로 뇌처럼 학습하는 AI 반도체 기술 개발",
+  "hero": "2025-11-12-af-synapse.jpg",
+  "blocks": [
+    { "p": "- GIST 반도체공학과 강동호 교수·경북대 장병철 교수 공동연구팀, 인간의 뇌 신호 처리 원리를 모사해 단일 소자에서 전류의 양(+)·음(−) 방향을 모두 제어하는 '양방향 시냅스' 구현" },
+    { "p": "- 전기와 빛을 함께 활용한 신호 세기 정밀 제어를 통해 얼굴 인식 정확도 95% 달성, 기존 기술 대비 학습 정확도 20% 향상 — 국제학술지 《Advanced Functional Materials》 게재" },
+    { "p": "Media in Korea: [헤럴드경제](https://biz.heraldcorp.com/article/10614585), 뉴시스, 전자신문" }
+  ]
+}

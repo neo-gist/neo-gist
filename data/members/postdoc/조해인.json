@@ -1,0 +1,50 @@
+{
+  "id": "조해인",
+  "ko": "조해인",
+  "en": "Haein Cho",
+  "init": "HC",
+  "img": "조해인.jpg",
+  "role": "InnoCORE Post-Doc.",
+  "email": "haein.hayne.cho@gmail.com",
+  "cv": "조해인.pdf",
+  "education": [
+    "Ph.D., Korea University (2018 – 2024)",
+    "B.S., Korea University (2013 – 2018)"
+  ],
+  "experience": [
+    "Postdoctoral Researcher, University of Virginia, USA (2025 – 2026)",
+    "Visiting Scholar, University of Virginia, USA (2024 – 2025)",
+    "Postdoctoral Researcher, KU-KIST, Korea University (2024)"
+  ],
+  "pubs": [
+    {
+      "y": "2025",
+      "a": "I. Lee†, H. Shin†, <b>H. Cho†</b>, J.-G. Choi, G. Wang*, S. Park*",
+      "t": "Skin-conformal electronics for intelligent gesture recognition",
+      "v": "Nature Reviews Electrical Engineering 2, 736–754"
+    },
+    {
+      "y": "2025",
+      "a": "Y. Baek†, B. Bae†, H. Shin†, C. Sonnadara†, <b>H. Cho†</b> et al., G. Wang*, K. Lee*",
+      "t": "Edge intelligence through in-sensor and near-sensor computing for the artificial intelligence of things",
+      "v": "npj Unconventional Computing 2, 25"
+    },
+    {
+      "y": "2023",
+      "a": "<b>H. Cho†</b>, I. Lee†, J. Jang†, J.-H. Kim, H. Lee, S. Park*, G. Wang*",
+      "t": "Real-time finger motion recognition using skin-conformable electronics",
+      "v": "Nature Electronics 6, 619–629 · News & Views"
+    },
+    {
+      "y": "2021",
+      "a": "<b>H. Cho</b>, C.-W. Jeon, B.-D. On, I.-K. Park, S. Choi, J. Jang*, G. Wang*",
+      "t": "Transparent and unipolar nonvolatile memory using two-dimensional vertically stacked layered double hydroxide",
+      "v": "Advanced Materials Interfaces 2001990 · Front Cover"
+    }
+  ],
+  "awards": [
+    "Young Scientist Award, 34th Int. Conf. on Molecular Electronics & Devices, POSTECH (2024)",
+    "2023 KU Achievement Award, Korea University (2024)",
+    "Best Oral Presentation Award, Korean Physical Society (2023)"
+  ]
+}

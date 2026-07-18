@@ -1,0 +1,49 @@
+{
+  "patents": [
+    {
+      "id": "2026-bipolar-us",
+      "y": "2026",
+      "region": "intl",
+      "a": "Dong-Ho Kang, Hyejin Yoon, Soeun Park",
+      "t": "Bipolar Optical Synaptic Device",
+      "app": "US 19/237,694",
+      "reg": ""
+    },
+    {
+      "id": "2020-ndt-us",
+      "y": "2020",
+      "region": "intl",
+      "a": "Jin-Hong Park, Jaewoo Shim, Dong-Ho Kang",
+      "t": "Semiconductor Device with Negative Differential Transconductance and Method of Manufacturing the Same",
+      "app": "US 16/005,792",
+      "reg": "US 10,840,347"
+    },
+    {
+      "id": "2026-bipolar-kr",
+      "y": "2026",
+      "region": "domestic",
+      "a": "강동호, 윤혜진, 박소은",
+      "t": "양극성 광 시냅스 디바이스",
+      "app": "10-2024-0077416",
+      "reg": "10-2982359"
+    },
+    {
+      "id": "2021-synapse-kr",
+      "y": "2021",
+      "region": "domestic",
+      "a": "박진홍, 허근, 유광위, 구지완, 강동호",
+      "t": "인공 시냅스 소자 및 이의 제조방법",
+      "app": "10-2020-0119915",
+      "reg": "10-2301330"
+    },
+    {
+      "id": "2019-ndt-kr",
+      "y": "2019",
+      "region": "domestic",
+      "a": "박진홍, 심재우, 강동호",
+      "t": "부성 미분 전달컨덕턴스 특성을 갖는 반도체 소자 및 그 제조 방법",
+      "app": "10-2017-0073360",
+      "reg": "10-1949504"
+    }
+  ]
+}

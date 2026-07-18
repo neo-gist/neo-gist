@@ -1,0 +1,38 @@
+[
+  {
+    "cat": "Facilities in NEO Lab",
+    "cards": [
+      { "img": "B1500A.png", "name": "High-Precision Source-Meter Units", "desc": "Keysight B1500A" },
+      { "img": "Pulse.png", "name": "Pulse Measurement Setup", "desc": "Keysight B2912B + Keysight 33500 Series" },
+      { "img": "PL.png", "name": "Home-Built Photoluminescence Setup", "desc": "Dongwoo-Optron MonoRa322i" },
+      { "img": "Transfer.jpg", "name": "2D Material Transfer System with Detection", "desc": "Sejong Science Instruments SLG-STR01" }
+    ]
+  },
+  {
+    "cat": "G-NICS Clean Room",
+    "cards": [
+      { "img": "EBL.png", "name": "E-beam Lithography", "desc": "" },
+      { "img": "EBE.png", "name": "E-beam Evaporator", "desc": "" },
+      { "img": "Mask.png", "name": "Mask Aligner", "desc": "" },
+      { "img": "ICP-RIE.png", "name": "ICP-RIE", "desc": "" },
+      { "img": "CCP-RIE.png", "name": "Reactive ion etching", "desc": "" },
+      { "img": "ALD.png", "name": "Atomic Layer Deposition", "desc": "" },
+      { "img": "PECVD.png", "name": "PECVD", "desc": "" },
+      { "img": "RTA.png", "name": "Rapid Thermal Annealing", "desc": "" },
+      { "img": "SEM.png", "name": "SEM", "desc": "" },
+      { "img": "Elipsometer.png", "name": "Elipsometer", "desc": "" }
+    ]
+  },
+  {
+    "cat": "Frequently Used Equipments @ GAIA, GIST",
+    "cards": [
+      { "img": "FIB.jpg", "name": "Focused Ion Beam", "desc": "" },
+      { "img": "TEM.png", "name": "Transmission Electron Microscope", "desc": "" },
+      { "img": "UHR-FESEM.jpg", "name": "Ultra-High-Resolution FE-SEM", "desc": "" },
+      { "img": "FT-IR.jpg", "name": "FT-IR", "desc": "" },
+      { "img": "Raman.jpg", "name": "Raman Spectroscopy", "desc": "" },
+      { "img": "XPS.jpg", "name": "X-ray Photoelectron Spectroscopy", "desc": "" },
+      { "img": "AFM.jpg", "name": "Atomic Force Microscope", "desc": "" }
+    ]
+  }
+]

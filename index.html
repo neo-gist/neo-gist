@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nano Electronics &amp; Optoelectronics Lab — GIST</title>
+<link rel="icon" type="image/png" href="images/site/favicon.png">
+<link rel="icon" type="image/svg+xml" href="images/site/favicon.svg">
+<link rel="apple-touch-icon" href="images/site/favicon.png">
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="theme.css?rev=92">
+</head>
+<body>
+
+<!-- 고정 헤더 -->
+<header class="masthead">
+  <div class="container masthead__row">
+    <div class="logo" data-view="view-home"><img src="images/site/gist-logo.png" alt="GIST" class="logo__gist" onerror="this.remove()"><span style="font-weight:700;font-size:19px;letter-spacing:.01em;color:var(--night)">NEO Lab</span></div>
+    <nav class="menu">
+      <div class="menu__item"><button class="menu__link" data-view="view-home">Home</button></div>
+      <div class="menu__item"><button class="menu__link" data-view="view-research">Research</button></div>
+      <div class="menu__item">
+        <button class="menu__link" data-view="view-members">Members <i class="menu__caret"></i></button>
+        <div class="submenu">
+          <a data-view="view-members" data-jump="to-professor">Professor</a>
+          <a data-view="view-members" data-jump="to-postdoc">Postdoc</a>
+          <a data-view="view-members" data-jump="to-students">Students</a>
+          <a data-view="view-members" data-jump="to-alumni">Alumni</a>
+        </div>
+      </div>
+      <div class="menu__item">
+        <button class="menu__link" data-view="view-pubs">Publications <i class="menu__caret"></i></button>
+        <div class="submenu">
+          <a data-view="view-pubs" data-filter="intl">International Journals</a>
+          <a data-view="view-pubs" data-filter="patent">Patents</a>
+        </div>
+      </div>
+      <div class="menu__item"><button class="menu__link" data-view="view-facility">Facility</button></div>
+      <div class="menu__item"><button class="menu__link" data-view="view-news">News</button></div>
+    </nav>
+    <button class="burger" id="burger" aria-label="menu"><span></span><span></span><span></span></button>
+  </div>
+</header>
+
+<!-- 모바일 슬라이드 메뉴 -->
+<div class="sheet" id="sheet">
+  <div class="sheet__panel">
+    <button class="sheet__close" id="sheetClose">&times;</button>
+    <div style="clear:both;height:8px"></div>
+    <div class="sheet-group"><button data-view="view-home">Home</button></div>
+    <div class="sheet-group"><button data-view="view-research">Research</button></div>
+    <div class="sheet-group"><button class="sheet-group__toggle">Members <span>+</span></button><div class="sheet-group__sub"><a data-view="view-members" data-jump="to-professor">Professor</a><a data-view="view-members" data-jump="to-postdoc">Postdoc</a><a data-view="view-members" data-jump="to-students">Students</a><a data-view="view-members" data-jump="to-alumni">Alumni</a></div></div>
+    <div class="sheet-group"><button class="sheet-group__toggle">Publications <span>+</span></button><div class="sheet-group__sub"><a data-view="view-pubs" data-filter="intl">International Journals</a><a data-view="view-pubs" data-filter="patent">Patents</a></div></div>
+    <div class="sheet-group"><button data-view="view-facility">Facility</button></div>
+    <div class="sheet-group"><button data-view="view-news">News</button></div>
+  </div>
+</div>
+
+<main>
+
+<!-- ================= HOME ================= -->
+<section class="screen is-active" id="view-home">
+  <div class="hero-banner hero-banner--center rise">
+    <img src="images/site/hero-banner.jpg" alt="Nano Electronics and Optoelectronics Lab @ GIST — 광주과학기술원 나노 전자/광전소자 연구실" onerror="this.parentElement.classList.add('is-empty');this.remove()">
+    <div class="hero-banner__inner">
+      <div class="container">
+        <h1 class="hero-banner__title">Nano Electronics &amp; Optoelectronics Laboratory</h1>
+        <!-- 부제(태그라인) — 아래 따옴표 사이에 문구를 넣으면 자동으로 표시됩니다. 비워두면 안 보입니다. -->
+        <p class="hero-banner__sub">We explore electronic and optoelectronic devices, from the device level to the system level.</p>
+      </div>
+    </div>
+    <button class="hero-scroll" data-scrollto="home-research" aria-label="아래로 스크롤">
+      <span class="hero-scroll__t">SCROLL</span>
+      <span class="hero-scroll__arrows"><i></i><i></i></span>
+    </button>
+  </div>
+  <div class="container">
+
+    <!-- OUR RESEARCH -->
+    <div class="band band--slim" id="home-research">
+      <div class="rhead rise">
+        <h2>OUR RESEARCH</h2>
+        <p>Nano Electronics &amp; Optoelectronics Lab</p>
+      </div>
+      <div class="rtiles" id="home-research-tiles"></div>
+    </div>
+
+    <!-- 최신 소식 -->
+    <div class="band band--slim band--news">
+      <div class="band-bar rise">
+        <h2>Lab News</h2>
+        <span class="band-bar__link" data-view="view-news">More news →</span>
+      </div>
+      <div class="feed" id="home-feed"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= RESEARCH ================= -->
+<section class="screen" id="view-research">
+  <div class="container band">
+    <div class="band-head rise jump-target" id="to-areas">
+      <div class="kicker">Research</div>
+      <h2>Research Area</h2>
+    </div>
+    <div class="research-cards" id="research-cards"></div>
+
+    <div class="proj-head">
+      <h3 class="subhead jump-target" id="to-projects">Research Projects</h3>
+      <div class="proj-pager" id="proj-pager"></div>
+    </div>
+    <div class="project-list" id="project-list"></div>
+  </div>
+</section>
+
+<!-- ================= RESEARCH DETAIL ================= -->
+<section class="screen" id="view-research-detail">
+  <div class="container band">
+    <article class="entry entry--research" id="research-mount"></article>
+  </div>
+</section>
+
+<!-- ================= MEMBERS ================= -->
+<section class="screen" id="view-members">
+  <div class="container band">
+    <div class="band-head rise jump-target" id="to-professor">
+      <div class="kicker">Members</div>
+      <h2>Professor</h2>
+    </div>
+
+    <div class="lead-prof rise">
+      <div class="lead-prof__photo"><img src="images/members/donghokang.jpg" alt="Dong-Ho Kang" onerror="this.remove()">DK</div>
+      <div class="lead-prof__body">
+        <h3>Dong-Ho Kang, Ph.D. <span style="font-weight:700;font-size:.7em;color:var(--night)">강동호</span></h3>
+        <div class="lead-prof__role">Associate Professor</div>
+        <div class="lead-prof__meta">
+          Department of Semiconductor Engineering, GIST<br>
+          E-mail: <a href="mailto:donghokang@gist.ac.kr">donghokang@gist.ac.kr</a>
+        </div>
+        <div class="lead-prof__cred">
+          <div class="lp-cred">
+            <h5>Professional Experience</h5>
+            <ul>
+              <li>Associate Professor, <b>GIST</b> — Dept. of Semiconductor Engineering (Mar. 2026 - Present)</li>
+              <li>Assistant Professor, <b>GIST</b> — Dept. of Semiconductor Engineering (Feb. 2025 - Feb. 2026)</li>
+              <li>Assistant Professor, <b>GIST</b> — School of EECS (Nov. 2021 - Jan. 2025)</li>
+              <li>Postdoctoral Fellow, <b>Nanyang Technological University</b>, Singapore (Mar. 2019 - Sep. 2021)</li>
+            </ul>
+          </div>
+          <div class="lp-cred">
+            <h5>Education</h5>
+            <ul>
+              <li><b>Ph.D. / M.S.</b> Electrical &amp; Computer Engineering, Sungkyunkwan University (2019)</li>
+              <li><b>B.S.</b> Electronic &amp; Electrical Engineering, Sungkyunkwan University (2014)</li>
+            </ul>
+          </div>
+        </div>
+        <div class="prof-links">
+          <a class="cv-btn" href="files/cv/강동호.pdf" target="_blank"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg> Curriculum Vitae</a>
+          <a class="cv-btn" href="https://scholar.google.co.kr/citations?user=3Kmdb4UAAAAJ&hl=ko" target="_blank"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/></svg> Google Scholar</a>
+          <a class="cv-btn" href="https://www.linkedin.com/in/dong-ho-kang-75b5bb187/" target="_blank"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2"/><path d="M7 10v7M7 7v.01M11 17v-4a2 2 0 0 1 4 0v4M15 17v-7"/></svg> LinkedIn</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="roster-group">
+      <h3 class="subhead jump-target" id="to-postdoc">Postdoctoral Researcher</h3>
+      <div class="roster roster--postdoc" data-group="postdoc"></div>
+    </div>
+    <div class="roster-group">
+      <h3 class="subhead jump-target" id="to-students">M.S./Ph.D. Students</h3>
+      <div class="roster" data-group="msphd"></div>
+    </div>
+    <div class="roster-group">
+      <h3 class="subhead">M.S. Students</h3>
+      <div class="roster" data-group="masters"></div>
+    </div>
+    <div class="roster-group">
+      <h3 class="subhead">Undergraduate Students</h3>
+      <div class="roster" data-group="undergraduate"></div>
+    </div>
+    <div class="roster-group">
+      <h3 class="subhead jump-target" id="to-alumni">Alumni</h3>
+      <div class="roster roster--alum" data-group="alumni"></div>
+    </div>
+    <div class="intern-block" id="intern-block">
+      <h3 class="subhead">Internship</h3>
+      <div class="intern-list" id="intern-list"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= PUBLICATIONS ================= -->
+<section class="screen" id="view-pubs">
+  <div class="container band">
+    <div class="band-head rise">
+      <div class="kicker">Publications</div>
+      <h2>Papers &amp; Patents</h2>
+    </div>
+    <div class="paper-tabs">
+      <button class="paper-tab is-active" data-filter="intl">International Journals</button>
+      <button class="paper-tab" data-filter="patent">Patents</button>
+    </div>
+    <div class="paper-set is-shown" id="pset-intl">
+      <div class="year-filter" id="year-filter"></div>
+      <div id="journal-list"></div>
+    </div>
+    <div class="paper-set" id="pset-patent"></div>
+  </div>
+</section>
+
+<!-- ================= FACILITY ================= -->
+<section class="screen" id="view-facility">
+  <div class="container band">
+    <div class="band-head rise">
+      <div class="kicker">Facility</div>
+      <h2>Facility</h2>
+    </div>
+    <div id="facility-cats"></div>
+  </div>
+</section>
+
+<!-- ================= NEWS ================= -->
+<section class="screen" id="view-news">
+  <div class="container band">
+    <div class="band-head rise jump-target" id="to-news">
+      <div class="kicker">News</div>
+      <h2>News</h2>
+    </div>
+
+    <div class="news-media-sec rise" id="news-media-sec">
+      <div class="media-head">
+        <h3 class="subhead">In the Media</h3>
+        <div class="media-nav">
+          <button class="media-nav__btn" data-mscroll="-1" aria-label="이전">‹</button>
+          <button class="media-nav__btn" data-mscroll="1" aria-label="다음">›</button>
+        </div>
+      </div>
+      <div class="media-grid" id="news-media"></div>
+    </div>
+
+    <div class="news-boards">
+      <div class="news-board rise">
+        <div class="news-board__head"><h3 class="news-board__h">Paper Acceptances</h3><div class="news-board__pager" id="pager-paper"></div></div>
+        <div class="post-list" id="news-paper"></div>
+      </div>
+      <div class="news-board rise">
+        <div class="news-board__head"><h3 class="news-board__h">Awards</h3><div class="news-board__pager" id="pager-award"></div></div>
+        <div class="post-list" id="news-award"></div>
+      </div>
+      <div class="news-board rise">
+        <div class="news-board__head"><h3 class="news-board__h">Grants</h3><div class="news-board__pager" id="pager-grant"></div></div>
+        <div class="post-list" id="news-grant"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ENTRY DETAIL (News 상세) ================= -->
+<section class="screen" id="view-entry">
+  <div class="container band">
+    <article class="entry" id="entry-mount"></article>
+  </div>
+</section>
+
+<!-- ================= MEMBER DETAIL ================= -->
+<section class="screen" id="view-bio">
+  <div class="container band">
+    <article class="entry" id="bio-mount"></article>
+  </div>
+</section>
+
+</main>
+
+<footer class="foot">
+  <div class="container">
+    <div class="foot__bottom">
+      <span>© 2026 Nano Electronics &amp; Optoelectronics Lab, GIST. All rights reserved.</span>
+    </div>
+  </div>
+</footer>
+
+<script src="site.js?rev=69"></script>
+</body>
+</html>

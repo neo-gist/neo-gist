@@ -1,0 +1,55 @@
+[
+  {
+    "year": "2026",
+    "people": [
+      { "name": "정동현", "note": "군휴학" },
+      { "name": "최재우" }
+    ]
+  },
+  {
+    "year": "2025",
+    "people": [
+      { "name": "박민식", "note": "내부 진학; 석사" },
+      { "name": "최원렬", "note": "DB HiTek" },
+      { "name": "이창민", "note": "POSTECH" },
+      { "name": "김재연" },
+      { "name": "한수현" },
+      { "name": "노태현" },
+      { "name": "이서영" }
+    ]
+  },
+  {
+    "year": "2024",
+    "people": [
+      { "name": "최유석", "note": "내부 진학; 석사" },
+      { "name": "고경환", "note": "SK hynix" },
+      { "name": "이강민", "note": "KAIST" },
+      { "name": "오치우", "note": "Tokyo Electron" },
+      { "name": "고다연" }
+    ]
+  },
+  {
+    "year": "2023",
+    "people": [
+      { "name": "백주환", "note": "내부 진학; 석박통합" },
+      { "name": "이승빈", "note": "내부 진학; 석사" },
+      { "name": "윤성일", "note": "내부 진학; 석사" },
+      { "name": "윤혜진", "note": "KAIST" },
+      { "name": "이정태", "note": "POSTECH" },
+      { "name": "정윤석", "note": "POSTECH" },
+      { "name": "정태희", "note": "Tokyo Electron" },
+      { "name": "손민형", "note": "성균관대학교" },
+      { "name": "최정은" },
+      { "name": "김태우" },
+      { "name": "홍기용" }
+    ]
+  },
+  {
+    "year": "2022",
+    "people": [
+      { "name": "박소은", "note": "내부 진학; 석사" },
+      { "name": "백주환", "note": "내부 진학; 석박통합" },
+      { "name": "고하늘" }
+    ]
+  }
+]
