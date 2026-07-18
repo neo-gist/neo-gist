@@ -961,7 +961,7 @@
     mount.innerHTML = researchData.map(a =>
       '<article class="rcard rcard--home rise" data-research="' + u(a.id) + '">' +
         '<div class="rcard__media">' +
-          (a.img ? '<img loading="lazy" src="images/research/' + u(a.img) + '" alt="" onerror="this.parentElement.classList.add(\'is-empty\');this.remove()">' : '') +
+          (a.img ? '<img fetchpriority="high" src="images/research/' + u(a.img) + '" alt="" onerror="this.parentElement.classList.add(\'is-empty\');this.remove()">' : '') +
           '<span class="rcard__link">' + RES_LINK_ICON + '</span>' +
         '</div>' +
         '<h3 class="rcard__title">' + richInline(a.title || '') + '</h3>' +
@@ -1158,6 +1158,31 @@
     checkPdfs();
 
     revealPass();
+
+    /* HOME 이미지가 끝난 뒤, 나머지 화면 이미지를 정해진 순서로 백그라운드 예열
+       (Members → Facility → Research → News → Publications). 방문 시 캐시에서 즉시 표시됨. */
+    if (document.readyState === 'complete') setTimeout(warmImages, 400);
+    else window.addEventListener('load', () => setTimeout(warmImages, 400), { once: true });
+  }
+
+  /* 이미지 URL 목록을 한 번에 미리 받아옴(다 끝나면 resolve) */
+  function preloadUrls(urls) {
+    return Promise.all(urls.map(src => new Promise(res => {
+      const im = new Image(); im.onload = im.onerror = () => res(); im.src = src;
+    })));
+  }
+  /* 화면(스크린) 순서대로 그 안의 지연 이미지들을 그룹 단위로 순차 예열 */
+  async function warmImages() {
+    const order = ['view-members', 'view-facility', 'view-research', 'view-news', 'view-pubs'];
+    for (const id of order) {
+      const scr = byId(id);
+      if (!scr) continue;
+      const urls = Array.from(new Set(
+        Array.prototype.slice.call(scr.querySelectorAll('img[loading="lazy"]'))
+          .map(i => i.getAttribute('src')).filter(Boolean)
+      ));
+      if (urls.length) await preloadUrls(urls);   // 이 화면이 다 받아진 뒤 다음 화면으로
+    }
   }
 
   /* 데이터 로딩과 무관하게, 정적 콘텐츠(히어로·섹션 제목)를 즉시 표시 */
