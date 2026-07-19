@@ -322,20 +322,14 @@
   }
 
   /* 특허 저자 매칭 — 한글 이름 정확 일치 또는 영문 '이니셜+성' 일치 */
+  /* 특허 저자 매칭 — 논문과 동일하게 전체 이름(영문/한글) 정확 일치로 판정 */
   function matchPatents(m) {
     const ko = (m.ko || '').replace(/\s/g, '');
-    const enParts = (m.en || '').trim().split(/\s+/).filter(Boolean);
-    const surname = enParts.length ? normName(enParts[enParts.length - 1]) : '';
-    const initial = enParts.length ? normName(enParts[0]).charAt(0) : '';
+    const enNorm = normName(m.en || '');                                  // 전체 영문 이름 정규화
     return patentsData.filter(p => (p.a || '').split(',').some(raw => {
       const a = raw.trim().replace(/\*/g, '');
-      if (ko && a.replace(/\s/g, '') === ko) return true;                 // 한글 정확 일치
-      const toks = a.split(/\s+/);
-      if (surname && toks.length >= 2) {                                  // 영문 이니셜+성
-        const asur = normName(toks[toks.length - 1]);
-        const ainit = normName(toks[0]).charAt(0);
-        if (asur === surname && ainit && ainit === initial) return true;
-      }
+      if (ko && a.replace(/\s/g, '') === ko) return true;                 // 한글 전체 이름 일치
+      if (enNorm && normName(a) === enNorm) return true;                  // 영문 전체 이름 일치
       return false;
     }));
   }
