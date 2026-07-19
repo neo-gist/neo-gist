@@ -552,7 +552,7 @@
       ? ' <a class="pdf-btn" data-pdf="' + p.key + '" href="' + pdfHref + '" target="_blank" rel="noopener"' + (pdfState[p.key] ? '' : ' hidden') + '><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>PDF</a>'
       : '';
     const cite = p.cite ? ' <span class="pv-c">' + p.cite + '</span>' : '';
-    const coverSrc = p.cover ? 'images/covers/' + (/\.[a-z0-9]+$/i.test(p.cover) ? p.cover : p.cover + '.png') : '';
+    const coverSrc = p.cover ? 'images/covers/' + (/\.[a-z0-9]+$/i.test(p.cover) ? p.cover : p.cover + '.jpg') : '';
     const cover = coverSrc
       ? '<div class="paper__cover"><img loading="lazy" src="' + coverSrc + '" alt="Cover" onerror="this.remove()"></div>'
       : '';
