@@ -772,7 +772,25 @@
     setTimeout(() => {
       if (jumpId) {
         const el = byId(jumpId);
-        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        if (el) {
+          /* 멤버 카드로 복귀(mcard-*)는 애니메이션 없이 즉시 이동, 그 외 섹션 점프는 부드럽게 */
+          if (jumpId.indexOf('mcard-') === 0) {
+            var de = document.documentElement, prev = de.style.scrollBehavior;
+            de.style.scrollBehavior = 'auto';
+            /* 이미 봤던 목록이므로 카드 등장(fade/slide) 애니메이션 없이 즉시 표시 */
+            var scr = document.querySelector('.screen.is-active');
+            if (scr) {
+              var rises = qsa('.screen.is-active .rise:not(.is-in)');
+              rises.forEach(t => { t.style.transition = 'none'; t.classList.add('is-in'); });
+              void scr.offsetHeight;                       // 강제 리플로우
+              rises.forEach(t => { t.style.transition = ''; });
+            }
+            el.scrollIntoView({ block: 'start' });
+            de.style.scrollBehavior = prev;
+          } else {
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }
       } else {
         window.scrollTo({ top: 0, behavior: 'auto' });
       }
