@@ -7,6 +7,49 @@
   const qsa = sel => Array.prototype.slice.call(document.querySelectorAll(sel));
   const u = encodeURIComponent;
 
+  /* ==========================================================================
+     URL 라우팅 — 탭마다 주소가 바뀌도록 (History API)
+      - 지금 페이지가 놓인 폴더(예: /neo-gist/)를 자동으로 감지해서 BASE 로 사용
+     - 각 화면(view)을 짧은 주소(slug)와 짝지음
+     ========================================================================== */
+  var APP_BASE = (function () {
+    var cs = document.currentScript;
+    var src = (cs && cs.src) ? cs.src : location.pathname;
+    var p = new URL(src, location.href).pathname;  // .../site.js
+    return p.replace(/[^/]*$/, '');                // 파일명 제거 → .../  (끝에 / 유지)
+  })();
+
+  /* 화면 id ↔ 주소 slug */
+  var ROUTES = {
+    'view-home': '',
+    'view-research': 'research',
+    'view-members': 'members',
+    'view-pubs': 'publications',
+    'view-facility': 'facility',
+    'view-news': 'news'
+  };
+  /* 상세 화면은 부모 탭의 주소를 사용 (새로고침 시 목록으로 복원) */
+  var VIEW_PARENT = {
+    'view-bio': 'view-members',
+    'view-entry': 'view-news',
+    'view-research-detail': 'view-research'
+  };
+  var suppressHistory = false;   // popstate/초기 복원 중에는 주소를 다시 쌓지 않음
+  var pendingScroll = null;      // 뒤로/앞으로 이동 시 복원할 스크롤 위치
+
+  function viewToPath(viewId) {
+    var slug = ROUTES[viewId];
+    if (slug === undefined) slug = ROUTES[VIEW_PARENT[viewId]] || '';
+    return APP_BASE + slug;      // 단일 세그먼트라 이미지·CSS 상대경로가 그대로 유지됨
+  }
+  function pathToView() {
+    var rel = location.pathname;
+    if (rel.indexOf(APP_BASE) === 0) rel = rel.slice(APP_BASE.length);
+    rel = rel.replace(/^\/+|\/+$/g, '');
+    for (var v in ROUTES) { if (ROUTES[v] === rel) return v; }
+    return 'view-home';
+  }
+
   /* 아바타(사진 없을 때) 배경 그라디언트 — 로드 순서대로 순환 배정 */
   const AVATAR_BG = [
     'linear-gradient(140deg,#2a2b28,#D42A1A)',
@@ -390,7 +433,7 @@
         '</div>' +
       '</div>' +
       edu + exp + selPubs + pubs + patSec + awardsSec;
-    navigate('view-bio');
+    navigate('view-bio', null, null, { detail: 'member', id: id });
     checkPdfs();
   }
 
@@ -439,7 +482,7 @@
       '<div class="entry__meta">' + entryMeta(type, n) + '</div>' +
       hero + body + files + cta +
       '<button class="return" data-view="view-news" data-jump="' + sec.anchor + '">← Back to ' + sec.label + '</button>';
-    navigate('view-entry');
+    navigate('view-entry', null, null, { detail: 'article', atype: type, id: id });
   }
 
   /* ==========================================================================
@@ -708,16 +751,33 @@
     if (set) set.classList.add('is-shown');
   }
 
-  function navigate(viewId, jumpId, filter) {
+  function navigate(viewId, jumpId, filter, extraState) {
     screens.forEach(s => s.classList.toggle('is-active', s.id === viewId));
     const key = viewId === 'view-entry' ? 'view-activity'
       : viewId === 'view-bio' ? 'view-members'
       : viewId === 'view-research-detail' ? 'view-research' : viewId;
     menuLinks.forEach(l => l.classList.toggle('is-current', l.dataset.view === key));
     if (viewId === 'view-pubs' && filter) applyFilter(filter);
+    if (!suppressHistory) {
+      /* 지금 화면을 떠나기 전에, 현재 스크롤 위치를 현재 기록에 저장 → 뒤로가기 때 복원 */
+      try { history.replaceState(Object.assign({}, history.state || {}, { scroll: window.scrollY }), ''); } catch (e) {}
+      var st = Object.assign({ v: viewId, j: jumpId, f: filter }, extraState || {});
+      try { history.pushState(st, '', viewToPath(viewId)); } catch (e) {}
+    }
     closeSheet();
     setTimeout(() => {
-      if (jumpId) {
+      if (pendingScroll != null) {
+        /* 뒤로/앞으로 이동 — 저장해 둔 위치로 즉시 복원(부드러운 스크롤 잠시 끔).
+           이미지 디코딩 등으로 레이아웃이 살짝 밀릴 수 있어 다음 프레임에 한 번 더 맞춤 */
+        var de = document.documentElement, prevSB = de.style.scrollBehavior, target = pendingScroll;
+        pendingScroll = null;
+        de.style.scrollBehavior = 'auto';
+        window.scrollTo(0, target);
+        requestAnimationFrame(function () {
+          window.scrollTo(0, target);
+          de.style.scrollBehavior = prevSB;
+        });
+      } else if (jumpId) {
         const el = byId(jumpId);
         if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
       } else {
@@ -1023,7 +1083,7 @@
       '<div class="rdetail">' + img + '<div class="rdetail__body">' + body + '</div></div>' +
       pubsSec + projSec +
       '<button class="return" data-view="view-research" data-jump="to-areas">← Back to Research</button>';
-    navigate('view-research-detail');
+    navigate('view-research-detail', null, null, { detail: 'research', id: id });
     renderRelPubs();
     renderRelProjs();
     checkPdfs();
@@ -1214,6 +1274,33 @@
       if (urls.length) await preloadUrls(urls);   // 이 화면이 다 받아진 뒤 다음 화면으로
     }
   }
+
+  /* ==========================================================================
+     라우팅 초기화 — 주소 복원 · 뒤로/앞으로 처리
+     ========================================================================== */
+  /* 스크롤 위치는 우리가 직접 관리(브라우저 자동복원 끔) */
+  if ('scrollRestoration' in history) { try { history.scrollRestoration = 'manual'; } catch (e) {} }
+
+  /* 뒤로/앞으로 — 기록에 저장된 화면(그리고 상세 카드)과 스크롤 위치를 복원 */
+  window.addEventListener('popstate', function (e) {
+    var st = e.state || {};
+    suppressHistory = true;
+    pendingScroll = (typeof st.scroll === 'number') ? st.scroll : 0;
+    if (st.detail === 'member') openMember(st.id);
+    else if (st.detail === 'article') openArticle(st.atype, st.id);
+    else if (st.detail === 'research') openResearch(st.id);
+    else navigate(st.v || pathToView(), st.j, st.f);
+    suppressHistory = false;
+  });
+
+  /* 첫 진입/새로고침 — 주소(예: /research)에 맞는 화면을 표시 */
+  (function initRoute() {
+    var viewId = pathToView();
+    suppressHistory = true;
+    navigate(viewId);
+    suppressHistory = false;
+    try { history.replaceState({ v: viewId, scroll: 0 }, '', viewToPath(viewId)); } catch (e) {}
+  })();
 
   /* 데이터 로딩과 무관하게, 정적 콘텐츠(히어로·섹션 제목)를 즉시 표시 */
   revealPass();

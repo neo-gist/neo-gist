@@ -3,6 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- GitHub Pages SPA: 404.html 이 넘겨준 경로(/?/research)를 원래 주소(/research)로 되돌림 -->
+<script>
+(function (l) {
+  if (l.search[1] === '/') {
+    var decoded = l.search.slice(1).split('&').map(function (s) {
+      return s.replace(/~and~/g, '&');
+    }).join('?');
+    window.history.replaceState(null, null, l.pathname.slice(0, -1) + decoded + l.hash);
+  }
+}(window.location));
+</script>
 <title>Nano Electronics &amp; Optoelectronics Lab — GIST</title>
 <link rel="icon" type="image/png" href="images/site/favicon.png">
 <link rel="icon" type="image/svg+xml" href="images/site/favicon.svg">
@@ -280,6 +291,6 @@
   </div>
 </footer>
 
-<script src="site.js?rev=76"></script>
+<script src="site.js?rev=77"></script>
 </body>
 </html>
