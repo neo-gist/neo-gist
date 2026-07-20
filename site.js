@@ -1,12 +1,55 @@
 
 (function () {
   'use strict';
-
+ 
   /* ---------- 짧은 헬퍼 ---------- */
   const byId = id => document.getElementById(id);
   const qsa = sel => Array.prototype.slice.call(document.querySelectorAll(sel));
   const u = encodeURIComponent;
-
+ 
+  /* ==========================================================================
+     URL 라우팅 — 탭마다 주소가 바뀌도록 (History API)
+      - 지금 페이지가 놓인 폴더(예: /neo-gist/)를 자동으로 감지해서 BASE 로 사용
+     - 각 화면(view)을 짧은 주소(slug)와 짝지음
+     ========================================================================== */
+  var APP_BASE = (function () {
+    var cs = document.currentScript;
+    var src = (cs && cs.src) ? cs.src : location.pathname;
+    var p = new URL(src, location.href).pathname;  // .../site.js
+    return p.replace(/[^/]*$/, '');                // 파일명 제거 → .../  (끝에 / 유지)
+  })();
+ 
+  /* 화면 id ↔ 주소 slug */
+  var ROUTES = {
+    'view-home': '',
+    'view-research': 'research',
+    'view-members': 'members',
+    'view-pubs': 'publications',
+    'view-facility': 'facility',
+    'view-news': 'news'
+  };
+  /* 상세 화면은 부모 탭의 주소를 사용 (새로고침 시 목록으로 복원) */
+  var VIEW_PARENT = {
+    'view-bio': 'view-members',
+    'view-entry': 'view-news',
+    'view-research-detail': 'view-research'
+  };
+  var suppressHistory = false;   // popstate/초기 복원 중에는 주소를 다시 쌓지 않음
+  var pendingScroll = null;      // 뒤로/앞으로 이동 시 복원할 스크롤 위치
+ 
+  function viewToPath(viewId) {
+    var slug = ROUTES[viewId];
+    if (slug === undefined) slug = ROUTES[VIEW_PARENT[viewId]] || '';
+    return APP_BASE + slug;      // 단일 세그먼트라 이미지·CSS 상대경로가 그대로 유지됨
+  }
+  function pathToView() {
+    var rel = location.pathname;
+    if (rel.indexOf(APP_BASE) === 0) rel = rel.slice(APP_BASE.length);
+    rel = rel.replace(/^\/+|\/+$/g, '');
+    for (var v in ROUTES) { if (ROUTES[v] === rel) return v; }
+    return 'view-home';
+  }
+ 
   /* 아바타(사진 없을 때) 배경 그라디언트 — 로드 순서대로 순환 배정 */
   const AVATAR_BG = [
     'linear-gradient(140deg,#2a2b28,#D42A1A)',
@@ -14,14 +57,14 @@
     'linear-gradient(140deg,#3a1512,#D42A1A)',
     'linear-gradient(140deg,#3a3f3c,#8A8C8A)'
   ];
-
+ 
   /* 로드된 컬렉션 보관소 */
   const store = { members: [], news: [] };
   const memberById = {};
   /* 논문 저자 볼드용 — 연구실 구성원 영문이름(정규화) 집합 */
   const memberNames = {};
   function normName(s) { return (s || '').toLowerCase().replace(/[^a-z]/g, ''); }
-
+ 
   /* 영문 이름 → 사진 파일명(성+이름, 소문자·영숫자). "Haein Cho" → "chohaein" */
   function enToFile(en) {
     const parts = (en || '').replace(/[.,]/g, ' ').trim().split(/\s+/).filter(Boolean);
@@ -43,7 +86,7 @@
     const path = 'images/members/' + u(base);
     return '<img loading="lazy" src="' + path + '.jpg" data-base="' + path + '" data-i="0" data-fb="remove" alt="' + alt + '" onerror="neoImg(this)">';
   }
-
+ 
   /* JCR 랭킹 — data/jcr.json (연도 → 저널 → {field,pct,if}). 논문 연도-1 로 조회 */
   const JCR = {};   // JCR[year][정규화 저널명] = {field, pct, if}
   function normJournal(s) { return (s || '').toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]/g, ''); }
@@ -54,7 +97,7 @@
     const tbl = JCR[yr]; if (!tbl) return null;
     return tbl[normJournal(journal)] || null;
   }
-
+ 
   /* 그룹(학위 구분) → 화면 라벨 */
   const GROUP_TITLE = {
     postdoc: 'Postdoctoral Researcher',
@@ -63,12 +106,12 @@
     undergraduate: 'Undergraduate Student',
     alumni: 'Alumni'
   };
-
+ 
   /* 상세 화면 섹션 등록부 (현재 News 만 사용) */
   const CATALOG = {
     news:       { pool: () => store.news,    folder: 'news',        label: 'News',        anchor: 'to-news' }
   };
-
+ 
   /* 뉴스 카테고리 — 언론보도(media)는 상단 포토카드, 나머지는 하단 게시판 */
   const NEWS_CATS = { media: 'In the Media', paper: 'Paper Accepted', award: 'Award', grant: 'Grant' };
   const NEWS_BOARDS = [
@@ -86,36 +129,36 @@
     return 'paper';
   }
   function catLabel(n) { return NEWS_CATS[newsCat(n)] || ''; }
-
+ 
   /* ---------- 문자열/날짜 헬퍼 ---------- */
-
+ 
   /* "2026-06-26" → "2026.06.26" (형식이 아니면 원문 그대로: 예 "상시 모집") */
   function prettyDate(v) {
     if (!v) return '';
     const hit = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(v).trim());
     return hit ? hit[1] + '.' + hit[2] + '.' + hit[3] : v;
   }
-
+ 
   /* 답변/본문은 문자열 또는 문자열 배열 → 공백으로 이어 한 문단으로 */
   function joinLines(v) {
     if (Array.isArray(v)) return v.filter(s => String(s == null ? '' : s).trim()).join(' ').trim();
     return (v || '').trim();
   }
-
+ 
   /* 반학기 인덱스: 봄(3~8월)=2Y, 가을(9~12월)=2Y+1, 1~2월=직전 가을(2Y-1) */
   function halfIndex(year, month) {
     if (month >= 9) return year * 2 + 1;
     if (month >= 3) return year * 2;
     return year * 2 - 1;
   }
-
+ 
   /* 영어 서수: 1→1st, 2→2nd, 3→3rd, 4→4th, 11→11th … */
   function ordinal(n) {
     const v = n % 100;
     if (v >= 11 && v <= 13) return n + 'th';
     return n + (['th', 'st', 'nd', 'rd'][n % 10] || 'th');
   }
-
+ 
   /* 입학 시점 기준 현재 학기 자동 계산.
      admit 형식: "YYYY-MM"(예 "2022-03","2025-09") 또는 "YYYY-spring|fall".
      반환: "7th semester" (아직 입학 전이면 빈 문자열 → 표시 안 함) */
@@ -133,7 +176,7 @@
     if (nth < 1) return '';
     return ordinal(nth) + ' semester';
   }
-
+ 
   /* 특이사항(note) — 마크다운 링크 [텍스트](url) 를 <a> 로 변환 */
   /* 인라인 서식 — **굵게**, {색|텍스트} (색: red/green/blue/amber/gray 또는 #hex/색이름) */
   const RICH_COLORS = { red: 'var(--accent-strong)', green: '#1E7A44', blue: '#1f6feb', amber: '#95660A', gray: 'var(--gray)' };
@@ -150,7 +193,7 @@
       return '<a href="' + href + '" target="_blank" rel="noopener" onclick="event.stopPropagation()">' + t + '</a>';
     });
   }
-
+ 
   /* 표시 지위: role 우선, 없으면 그룹 라벨. 학기가 계산되면 " · Nth semester" 결합 */
   function displayRole(m) {
     return m.role || GROUP_TITLE[m.group] || '';
@@ -160,14 +203,14 @@
     const term = academicTerm(m);
     return term ? base + ' · ' + term : base;
   }
-
+ 
   /* 역할 태그(예: Lab leader, Fab. PIC) — 배열 tags 를 알약 배지로 */
   function tagsHTML(m, cls) {
     if (!m.tags || !m.tags.length) return '';
     const pills = m.tags.filter(Boolean).map(t => '<span class="mtag">' + t + '</span>').join('');
     return '<div class="' + cls + '">' + pills + '</div>';
   }
-
+ 
   /* ==========================================================================
      데이터 적재
      ========================================================================== */
@@ -198,12 +241,12 @@
     }));
     return groups.flat();
   }
-
+ 
   /* Members: data/members/<group>/ 폴더별로 관리 (폴더가 group 을 결정) */
   function fetchMembers() {
     return fetchGrouped('members', ['postdoc', 'msphd', 'masters', 'undergraduate', 'alumni'], 'group');
   }
-
+ 
   /* News: data/news/<카테고리>/ 폴더별로 관리 (폴더가 카테고리를 결정) */
   /* 언론보도(media)는 상세 페이지가 있어 개별 파일 폴더로, 나머지는 카테고리별 배열 파일 하나로 관리 */
   async function fetchNews() {
@@ -214,7 +257,7 @@
     }));
     return media.concat(boards.flat());
   }
-
+ 
   /* ==========================================================================
      멤버
      ========================================================================== */
@@ -224,14 +267,14 @@
       memberById[m.id] = m;
     });
   }
-
+ 
   /* CV 버튼 — cv(파일명)가 있으면 files/cv/ 경로로 새 탭 열기 */
   function cvButton(p) {
     return p.cv
       ? '<a class="cv-btn" href="files/cv/' + u(p.cv) + '" target="_blank" rel="noopener" onclick="event.stopPropagation()">CV <span class="cv-btn__ar" aria-hidden="true">↗</span></a>'
       : '';
   }
-
+ 
   function personCard(p) {
     const interests = (p.ri || []).filter(Boolean).join(', ');
     const edu = (p.education || []).filter(Boolean);
@@ -264,7 +307,7 @@
       blocks +
       '</article>';
   }
-
+ 
   /* Postdoc 카드: 교수 카드의 약 절반 크기 — 사진(좌) + 정보(우) 가로형 */
   function postdocCard(p) {
     const interests = (p.ri || []).filter(Boolean).join(', ');
@@ -288,7 +331,7 @@
       '</div>' +
       '</article>';
   }
-
+ 
   function paintMembers() {
     qsa('.roster').forEach(grid => {
       const g = grid.dataset.group;
@@ -300,7 +343,7 @@
       if (wrap) wrap.style.display = people.length ? '' : 'none';
     });
   }
-
+ 
   /* ==========================================================================
      상세 — 멤버 페이지
      ========================================================================== */
@@ -320,7 +363,7 @@
       ? '<div class="bio-sec"><h3>' + title + '</h3><ul class="bio-edu">' + items.map(e => '<li>' + e + '</li>').join('') + '</ul></div>'
       : '';
   }
-
+ 
   /* 특허 저자 매칭 — 한글 이름 정확 일치 또는 영문 '이니셜+성' 일치 */
   /* 특허 저자 매칭 — 논문과 동일하게 전체 이름(영문/한글) 정확 일치로 판정 */
   function matchPatents(m) {
@@ -333,7 +376,7 @@
       return false;
     }));
   }
-
+ 
   function openMember(id) {
     const m = memberById[id];
     if (!m) return;
@@ -359,7 +402,7 @@
     const selPubs = (m.pubs && m.pubs.length)
       ? '<div class="bio-sec bio-pubs"><h3>Selected Publications</h3>' + m.pubs.map(memberPubRow).join('') + '</div>'
       : '';
-
+ 
     /* 이 멤버의 논문 — 1저자(공동1저자 포함) / 공저자 */
     const myNorm = normName(m.en || '');
     const isLead = p => p.leadNorms && p.leadNorms.indexOf(myNorm) >= 0;
@@ -372,7 +415,7 @@
     const pubs =
       (leadRows ? '<div class="bio-sec bio-pubs"><h3>First-Author Publications</h3>' + leadRows + '</div>' : '') +
       (contribRows ? '<div class="bio-sec bio-pubs"><h3>Contributed Publications</h3>' + contribRows + '</div>' : '');
-
+ 
     byId('bio-mount').innerHTML =
       '<div class="bio-top">' +
         '<div class="trail"><a data-view="view-members" data-jump="mcard-' + m.id + '">Members</a> › <span>' + m.ko + '</span></div>' +
@@ -390,10 +433,10 @@
         '</div>' +
       '</div>' +
       edu + exp + selPubs + pubs + patSec + awardsSec;
-    navigate('view-bio');
+    navigate('view-bio', null, null, { detail: 'member', id: id });
     checkPdfs();
   }
-
+ 
   /* ==========================================================================
      상세 — Activity 공용 기사
      ========================================================================== */
@@ -403,7 +446,7 @@
     if (n.posted) bits.push('<span class="entry__date">Posted ' + prettyDate(n.posted) + '</span>');
     return bits.join('');
   }
-
+ 
   function openArticle(type, id) {
     const sec = CATALOG[type];
     if (!sec) return;
@@ -411,13 +454,13 @@
     if (!n) return;
     const folder = sec.folder;
     const mediaBase = 'images/' + folder + '/';
-
+ 
     const body = (n.blocks || []).map(b => {
       if (b.p) return '<p>' + noteHTML(b.p) + '</p>';
       if (b.img) return '<figure><div class="frame"><img loading="lazy" src="' + mediaBase + u(b.img) + '" alt="" onerror="this.parentElement.classList.add(\'is-empty\');this.remove()"></div><figcaption>' + (b.cap || '') + '</figcaption></figure>';
       return '';
     }).join('');
-
+ 
     const hero = n.hero
       ? '<div class="frame"><img loading="lazy" src="' + mediaBase + u(n.hero) + '" alt="" onerror="this.parentElement.classList.add(\'is-empty\');this.remove()"></div>'
       : '';
@@ -432,16 +475,16 @@
           return '<a class="file-link" href="files/' + folder + '/' + u(n.id) + '/' + u(file) + '" download><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg><span>' + label + '</span></a>';
         }).join('') + '</div>'
       : '';
-
+ 
     byId('entry-mount').innerHTML =
       '<div class="trail"><a data-view="view-news" data-jump="' + sec.anchor + '">' + sec.label + '</a> › <span>' + richInline(n.title) + '</span></div>' +
       '<h1>' + richInline(n.title) + '</h1>' +
       '<div class="entry__meta">' + entryMeta(type, n) + '</div>' +
       hero + body + files + cta +
       '<button class="return" data-view="view-news" data-jump="' + sec.anchor + '">← Back to ' + sec.label + '</button>';
-    navigate('view-entry');
+    navigate('view-entry', null, null, { detail: 'article', atype: type, id: id });
   }
-
+ 
   /* ==========================================================================
      리스트/그리드 렌더러
      ========================================================================== */
@@ -456,7 +499,7 @@
     const base = 'images/' + folder + '/' + u(hero);
     return '<div class="media-card__thumb"><img loading="lazy" src="' + base + '.jpg" data-base="' + base + '" data-i="0" data-fb="icon" data-icon="' + encodeURIComponent(icon) + '" alt="" style="' + style + '" onerror="neoImg(this)"></div>';
   }
-
+ 
   /* Facility — 카테고리별 가로 스크롤 카드(In the Media 스타일, 클릭·태그·날짜 없음) */
   function paintFacility(cats) {
     const mount = byId('facility-cats');
@@ -482,9 +525,9 @@
       '</div>';
     }).join('');
   }
-
+ 
   const byDateDesc = (a, b) => String(b.posted || '').localeCompare(String(a.posted || ''));
-
+ 
   /* 언론 보도 — 상단 전체폭 포토카드 그리드 */
   function paintNewsMedia() {
     const sec = byId('news-media-sec');
@@ -502,7 +545,7 @@
         '</div>' +
       '</div>').join('');
   }
-
+ 
   /* 논문/수상/과제 — 하단 3열 게시판(카테고리별, 페이지당 5개, 번호매김, 페이지 넘김) */
   const NEWS_PAGE_SIZE = 5;
   const newsPage = { paper: 0, award: 0, grant: 0 };
@@ -535,7 +578,7 @@
     newsPage[cat] = (newsPage[cat] || 0) + dir;
     paintNewsBoards();
   }
-
+ 
   /* 홈 'Lab News' — 최신 소식 10건 */
   function paintFeed() {
     const merged = store.news
@@ -549,7 +592,7 @@
         '<span class="feed__date">' + prettyDate(row.n.posted) + '</span>' +
       '</div>').join('');
   }
-
+ 
   /* ---------- 논문 ---------- */
   function journalRow(p) {
     const doiUrl = p.d ? (/^https?:/i.test(p.d) ? p.d : 'https://doi.org/' + p.d) : '';
@@ -581,7 +624,7 @@
       '<div class="paper__authors">' + p.a + '</div>' +
       '<div class="paper__venue">' + jName + cite + pdfBtn + '</div></div>' + cover + '</div>';
   }
-
+ 
   /* ==========================================================================
      BibTeX 파싱 — 저널 논문은 data/ref.bib 로 관리
      author+an 주석: N=jointfirst → 이름 끝 †,  N=corresponding → 이름 끝 *
@@ -656,7 +699,7 @@
         leadNorms: leadNorms, allNorms: allNorms };
     }).filter(p => p.a || p.t);
   }
-
+ 
   /* 상태 배지 — state(Under Review / In Revision / Accepted) → 색상 구분 */
   function stateBadge(state) {
     if (!state) return '';
@@ -694,30 +737,47 @@
   }
   /* 해외/국내 구분 — region 우선, 없으면 한글 포함 여부로 자동 판정 */
   function patRegion(p) { return p.region || (/[가-힣]/.test((p.app || '') + (p.reg || '') + (p.a || '')) ? 'domestic' : 'intl'); }
-
+ 
   /* ==========================================================================
      라우팅
      ========================================================================== */
   const screens = qsa('.screen');
   const menuLinks = qsa('.menu__link');
-
+ 
   function applyFilter(key) {
     qsa('.paper-tab').forEach(t => t.classList.toggle('is-active', t.dataset.filter === key));
     qsa('.paper-set').forEach(s => s.classList.remove('is-shown'));
     const set = byId('pset-' + key);
     if (set) set.classList.add('is-shown');
   }
-
-  function navigate(viewId, jumpId, filter) {
+ 
+  function navigate(viewId, jumpId, filter, extraState) {
     screens.forEach(s => s.classList.toggle('is-active', s.id === viewId));
     const key = viewId === 'view-entry' ? 'view-activity'
       : viewId === 'view-bio' ? 'view-members'
       : viewId === 'view-research-detail' ? 'view-research' : viewId;
     menuLinks.forEach(l => l.classList.toggle('is-current', l.dataset.view === key));
     if (viewId === 'view-pubs' && filter) applyFilter(filter);
+    if (!suppressHistory) {
+      /* 지금 화면을 떠나기 전에, 현재 스크롤 위치를 현재 기록에 저장 → 뒤로가기 때 복원 */
+      try { history.replaceState(Object.assign({}, history.state || {}, { scroll: window.scrollY }), ''); } catch (e) {}
+      var st = Object.assign({ v: viewId, j: jumpId, f: filter }, extraState || {});
+      try { history.pushState(st, '', viewToPath(viewId)); } catch (e) {}
+    }
     closeSheet();
     setTimeout(() => {
-      if (jumpId) {
+      if (pendingScroll != null) {
+        /* 뒤로/앞으로 이동 — 저장해 둔 위치로 즉시 복원(부드러운 스크롤 잠시 끔).
+           이미지 디코딩 등으로 레이아웃이 살짝 밀릴 수 있어 다음 프레임에 한 번 더 맞춤 */
+        var de = document.documentElement, prevSB = de.style.scrollBehavior, target = pendingScroll;
+        pendingScroll = null;
+        de.style.scrollBehavior = 'auto';
+        window.scrollTo(0, target);
+        requestAnimationFrame(function () {
+          window.scrollTo(0, target);
+          de.style.scrollBehavior = prevSB;
+        });
+      } else if (jumpId) {
         const el = byId(jumpId);
         if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
       } else {
@@ -726,7 +786,7 @@
       revealPass();
     }, 50);
   }
-
+ 
   /* ==========================================================================
      이벤트 (위임 하나로 모든 클릭 처리)
      ========================================================================== */
@@ -808,13 +868,13 @@
       navigate(nav.dataset.view, nav.dataset.jump, nav.dataset.filter);
     }
   });
-
+ 
   /* 논문 탭 (data-view 가 없는 페이지 내 탭 버튼) */
   qsa('.paper-tab').forEach(tab => tab.addEventListener('click', () => {
     applyFilter(tab.dataset.filter);
     setTimeout(revealPass, 40);
   }));
-
+ 
   /* ---------- 모바일 슬라이드 메뉴 ---------- */
   const sheet = byId('sheet');
   function closeSheet() { sheet.classList.remove('is-open'); }
@@ -826,7 +886,7 @@
     group.classList.toggle('is-open');
     btn.querySelector('span').textContent = group.classList.contains('is-open') ? '-' : '+';
   }));
-
+ 
   /* ---------- 스크롤 등장 애니메이션 ---------- */
   let observer;
   function revealPass() {
@@ -840,7 +900,7 @@
     }
     targets.forEach(t => observer.observe(t));
   }
-
+ 
   /* 인턴 명단 — 연도별 한 줄, 이름(비고) 컴팩트 표기 */
   function paintInterns(rows) {
     const mount = byId('intern-list');
@@ -856,7 +916,7 @@
       return '<div class="intern-row"><div class="intern-year">' + r.year + '</div><div class="intern-names">' + names + '</div></div>';
     }).join('');
   }
-
+ 
   /* ---------- 논문 필터 (In Progress + 연도, 다중 선택) ---------- */
   const pdfState = {};     // 인용키 → true(PDF 있음)/false(없음). 1회 확인 후 캐시
   /* files/publication/<key>.pdf 존재 여부를 확인해 있으면 버튼 표시 */
@@ -934,7 +994,7 @@
     paintYearFilter();
     paintJournals();
   }
-
+ 
   /* 과제 상태 — 연구기간(YYYY.MM - YYYY.MM)과 오늘 비교:
      시작 전 = Awarded, 진행 중 = On-going, 종료 후 = Terminated (월 단위, 종료월까지 진행중) */
   function projectStatus(period) {
@@ -948,13 +1008,13 @@
     if (n > e) return { k: 'terminated', t: 'Terminated' };
     return { k: 'ongoing', t: 'On-going' };
   }
-
+ 
   /* 연구기간 시작월(정렬용): "2025.01 - ..." → 2025*12+1 */
   function projStart(period) {
     const m = String(period || '').match(/(\d{4})\D+(\d{1,2})/);
     return m ? (+m[1]) * 12 + (+m[2]) : 0;
   }
-
+ 
   /* ---------- Research Areas ---------- */
   let researchData = [];
   function paintResearchAreas(areas) {
@@ -972,7 +1032,7 @@
     if (!researchData.length) mount.innerHTML = '';
     paintHomeResearch();
   }
-
+ 
   /* HOME 'OUR RESEARCH' — 정사각 카드(모서리 컷 + 링크 아이콘), 클릭 시 상세 */
   const RES_LINK_ICON = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>';
   function paintHomeResearch() {
@@ -987,7 +1047,7 @@
         '<h3 class="rcard__title">' + richInline(a.title || '') + '</h3>' +
       '</article>').join('');
   }
-
+ 
   /* Research 상세 — 카드 클릭 시. 왼쪽 이미지(절반) + 오른쪽 본문, 하단 키워드 매칭 Related 섹션 */
   function openResearch(id) {
     const a = researchData.find(x => x.id === id);
@@ -1002,7 +1062,7 @@
       if (b.img) return '<figure><div class="frame"><img loading="lazy" src="' + base + u(b.img) + '" alt="" onerror="this.parentElement.classList.add(\'is-empty\');this.remove()"></div><figcaption>' + (b.cap || '') + '</figcaption></figure>';
       return '';
     }).join('');
-
+ 
     /* 키워드 매칭 — 논문/프로젝트의 keyword 가 이 연구분야의 keywords 목록에 있으면 자동 노출 */
     const kws = (a.keywords || (a.keyword ? [a.keyword] : [])).map(k => String(k).trim()).filter(Boolean);
     const hit = k => kws.length && k && kws.indexOf(String(k).trim()) >= 0;
@@ -1016,19 +1076,19 @@
     const projSec = relState.projs.length
       ? '<div class="rel-head rdetail__sec"><h2 class="entry__h">Related Projects</h2><div class="rel-pager" id="rel-projs-pager"></div></div><div class="project-list" id="rel-projs"></div>'
       : '';
-
+ 
     byId('research-mount').innerHTML =
       '<div class="trail"><a data-view="view-research" data-jump="to-areas">Research</a> › <span>' + richInline(a.title) + '</span></div>' +
       '<h1>' + richInline(a.title) + '</h1>' +
       '<div class="rdetail">' + img + '<div class="rdetail__body">' + body + '</div></div>' +
       pubsSec + projSec +
       '<button class="return" data-view="view-research" data-jump="to-areas">← Back to Research</button>';
-    navigate('view-research-detail');
+    navigate('view-research-detail', null, null, { detail: 'research', id: id });
     renderRelPubs();
     renderRelProjs();
     checkPdfs();
   }
-
+ 
   /* Related Publications(5개)/Projects(3개) — 각 섹션 우상단 페이지 버튼 */
   const REL_PUB_SIZE = 5;
   const REL_PROJ_SIZE = 3;
@@ -1058,7 +1118,7 @@
     mount.innerHTML = all.slice(s, s + REL_PROJ_SIZE).map(projectRowHTML).join('');
     const pg = byId('rel-projs-pager'); if (pg) pg.innerHTML = relPagerHTML('projs', relState.projsPage, pages);
   }
-
+ 
   /* ---------- Research Projects (5개씩 페이지 넘김) ---------- */
   /* 지원기관 로고 파일명 매핑 — data/research/partners.json { "한글명": "영문파일명" }.
      매핑에 있으면 그 파일명(영문)을, 없으면 f 값(한글) 그대로 파일명으로 사용. */
@@ -1097,7 +1157,7 @@
     }
   }
   function turnProjPage(dir) { projPage += dir; paintProjects(); setTimeout(revealPass, 30); }
-
+ 
   /* 지원기관 로고 로드 실패 시 확장자 순차 시도(png→jpg→svg→...) 후 없으면 숨김 */
   window.neoFundErr = function (img) {
     const exts = ['jpg', 'svg', 'jpeg', 'webp'];
@@ -1105,7 +1165,7 @@
     if (i < exts.length) { img.dataset.i = i + 1; img.src = img.dataset.base + '.' + exts[i]; }
     else { img.remove(); }
   };
-
+ 
   /* 확장자 자동 탐색(첫 시도 .jpg 이후 순차) 후 실패 시 폴백.
      data-fb="icon" → 부모를 아이콘으로 교체(Facility), 그 외 → 제거(멤버 사진 → 이니셜) */
   window.neoImg = function (img) {
@@ -1115,7 +1175,7 @@
     if (img.dataset.fb === 'icon' && img.dataset.icon) img.parentElement.innerHTML = decodeURIComponent(img.dataset.icon);
     else img.remove();
   };
-
+ 
   /* ==========================================================================
      부트스트랩
      ========================================================================== */
@@ -1145,33 +1205,33 @@
     });
     store.members = members;
     store.news = news;
-
+ 
     /* 멤버 */
     indexMembers(members);
     members.forEach(m => { if (m.en) memberNames[normName(m.en)] = 1; });
     paintMembers();
-
+ 
     /* 인턴(있으면 표시, 없으면 섹션 숨김) */
     fetchJSON('members/interns.json')
       .then(paintInterns)
       .catch(() => { const b = byId('intern-block'); if (b) b.style.display = 'none'; });
-
+ 
     /* Research Areas (이미지 카드 + See More 상세) */
     paintResearchAreas(areas);
-
+ 
     /* 프로젝트 — 최신순 5개씩 페이지 넘김 */
     projectsData = (projects || []).slice().sort((a, b) => projStart(b.p) - projStart(a.p));
     projPage = 0;
     paintProjects();
-
+ 
     /* Facility */
     paintFacility(facility);
-
+ 
     /* News */
     paintNewsMedia();
     paintNewsBoards();
     paintFeed();
-
+ 
     /* 논문 — BibTeX(data/ref.bib): year=In Progress 는 목록 맨 위, 나머지는 연도별 저널.  특허 — publications.json */
     const allBib = parseBib(bibText || '');
     journalsData = allBib.filter(p => !p.prog).sort((a, b) => (b.y - a.y) || (b._i - a._i));
@@ -1186,15 +1246,15 @@
       (intlPat.length ? '<h3 class="pat-head">International</h3>' + intlPat.map(patentRow).join('') : '') +
       (domPat.length ? '<h3 class="pat-head">Domestic (Korea)</h3>' + domPat.map(patentRow).join('') : '');
     checkPdfs();
-
+ 
     revealPass();
-
+ 
     /* HOME 이미지가 끝난 뒤, 나머지 화면 이미지를 정해진 순서로 백그라운드 예열
        (Members → Facility → Research → News → Publications). 방문 시 캐시에서 즉시 표시됨. */
     if (document.readyState === 'complete') setTimeout(warmImages, 400);
     else window.addEventListener('load', () => setTimeout(warmImages, 400), { once: true });
   }
-
+ 
   /* 이미지 URL 목록을 한 번에 미리 받아옴(다 끝나면 resolve) */
   function preloadUrls(urls) {
     return Promise.all(urls.map(src => new Promise(res => {
@@ -1214,8 +1274,36 @@
       if (urls.length) await preloadUrls(urls);   // 이 화면이 다 받아진 뒤 다음 화면으로
     }
   }
-
+ 
+  /* ==========================================================================
+     라우팅 초기화 — 주소 복원 · 뒤로/앞으로 처리
+     ========================================================================== */
+  /* 스크롤 위치는 우리가 직접 관리(브라우저 자동복원 끔) */
+  if ('scrollRestoration' in history) { try { history.scrollRestoration = 'manual'; } catch (e) {} }
+ 
+  /* 뒤로/앞으로 — 기록에 저장된 화면(그리고 상세 카드)과 스크롤 위치를 복원 */
+  window.addEventListener('popstate', function (e) {
+    var st = e.state || {};
+    suppressHistory = true;
+    pendingScroll = (typeof st.scroll === 'number') ? st.scroll : 0;
+    if (st.detail === 'member') openMember(st.id);
+    else if (st.detail === 'article') openArticle(st.atype, st.id);
+    else if (st.detail === 'research') openResearch(st.id);
+    else navigate(st.v || pathToView(), st.j, st.f);
+    suppressHistory = false;
+  });
+ 
+  /* 첫 진입/새로고침 — 주소(예: /research)에 맞는 화면을 표시 */
+  (function initRoute() {
+    var viewId = pathToView();
+    suppressHistory = true;
+    navigate(viewId);
+    suppressHistory = false;
+    try { history.replaceState({ v: viewId, scroll: 0 }, '', viewToPath(viewId)); } catch (e) {}
+  })();
+ 
   /* 데이터 로딩과 무관하게, 정적 콘텐츠(히어로·섹션 제목)를 즉시 표시 */
   revealPass();
   boot();
 })();
+ 
