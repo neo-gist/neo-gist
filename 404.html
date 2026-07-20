@@ -8,12 +8,15 @@
   /research 같은 실제 파일이 없는 주소로 직접 접속·새로고침하면 GitHub 이 이 404 를 보여줌.
   여기서 주소를 /?/research 형태로 바꿔 index.html 로 넘기면, index.html 의 head 스크립트가
   다시 원래 주소(/research)로 되돌리고 site.js 가 해당 화면을 띄움.
-  pathSegmentsToKeep = 1  →  프로젝트 페이지(/neo-gist/) 이므로 앞의 한 칸(/neo-gist)은 그대로 둠.
-  (나중에 커스텀 도메인을 붙여 루트(/)에서 서비스하면 이 값을 0 으로 바꾸면 됨)
+
+  pathSegmentsToKeep — base 경로에서 유지할 칸 수. 도메인을 보고 자동 판별:
+    · *.github.io (프로젝트 페이지, 예: neo-gist.github.io/neo-gist) → 1  (앞의 /neo-gist 유지)
+    · 커스텀 도메인 (예: dongho.kang, 루트에서 서비스)               → 0
+  덕분에 나중에 커스텀 도메인만 연결하면 이 파일은 손댈 필요 없음.
 -->
 <script>
-  var pathSegmentsToKeep = 1;
   var l = window.location;
+  var pathSegmentsToKeep = l.hostname.endsWith('.github.io') ? 1 : 0;
   l.replace(
     l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
     l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') + '/?/' +
