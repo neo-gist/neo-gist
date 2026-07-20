@@ -36,6 +36,29 @@
   };
   var suppressHistory = false;   // popstate/초기 복원 중에는 주소를 다시 쌓지 않음
   var pendingScroll = null;      // 뒤로/앞으로 이동 시 복원할 스크롤 위치
+  var restoreToken = 0;          // 스크롤 복원 재시도 취소용 토큰
+
+  /* 저장된 스크롤 위치로 복원.
+     첫 방문 등으로 목록 이미지가 아직 로딩 중이면 페이지가 짧아 목표 위치까지 못 내려감.
+     → 목표 높이가 확보되고 실제로 그 위치에 닿을 때까지(최대 1.5초) 매 프레임 다시 맞춤. */
+  function restoreScroll(target) {
+    if (!target) { window.scrollTo(0, 0); return; }
+    var token = ++restoreToken;
+    var de = document.documentElement, prevSB = de.style.scrollBehavior;
+    de.style.scrollBehavior = 'auto';
+    var deadline = Date.now() + 1500;
+    (function apply() {
+      if (token !== restoreToken) { de.style.scrollBehavior = prevSB; return; } // 다른 이동 시작됨
+      window.scrollTo(0, target);
+      var maxScroll = de.scrollHeight - window.innerHeight;
+      var reached = Math.abs(window.scrollY - target) <= 2;
+      if ((reached && maxScroll >= target - 2) || Date.now() > deadline) {
+        de.style.scrollBehavior = prevSB;
+        return;
+      }
+      requestAnimationFrame(apply);
+    })();
+  }
 
   function viewToPath(viewId) {
     var slug = ROUTES[viewId];
@@ -752,6 +775,9 @@
   }
 
   function navigate(viewId, jumpId, filter, extraState) {
+    /* 화면을 숨기기 전에 현재 스크롤 위치를 먼저 확보 — 숨기는 순간 페이지가 짧아지며
+       브라우저가 scrollY 를 위로 깎아버리기 때문(그러면 엉뚱한 값이 저장됨) */
+    var leavingScroll = window.pageYOffset || document.documentElement.scrollTop || 0;
     screens.forEach(s => s.classList.toggle('is-active', s.id === viewId));
     const key = viewId === 'view-entry' ? 'view-activity'
       : viewId === 'view-bio' ? 'view-members'
@@ -760,23 +786,17 @@
     if (viewId === 'view-pubs' && filter) applyFilter(filter);
     if (!suppressHistory) {
       /* 지금 화면을 떠나기 전에, 현재 스크롤 위치를 현재 기록에 저장 → 뒤로가기 때 복원 */
-      try { history.replaceState(Object.assign({}, history.state || {}, { scroll: window.scrollY }), ''); } catch (e) {}
+      try { history.replaceState(Object.assign({}, history.state || {}, { scroll: leavingScroll }), ''); } catch (e) {}
       var st = Object.assign({ v: viewId, j: jumpId, f: filter }, extraState || {});
       try { history.pushState(st, '', viewToPath(viewId)); } catch (e) {}
     }
     closeSheet();
     setTimeout(() => {
       if (pendingScroll != null) {
-        /* 뒤로/앞으로 이동 — 저장해 둔 위치로 즉시 복원(부드러운 스크롤 잠시 끔).
-           이미지 디코딩 등으로 레이아웃이 살짝 밀릴 수 있어 다음 프레임에 한 번 더 맞춤 */
-        var de = document.documentElement, prevSB = de.style.scrollBehavior, target = pendingScroll;
+        /* 뒤로/앞으로 이동 — 저장해 둔 위치로 복원(이미지 로딩까지 기다리며 재시도) */
+        var target = pendingScroll;
         pendingScroll = null;
-        de.style.scrollBehavior = 'auto';
-        window.scrollTo(0, target);
-        requestAnimationFrame(function () {
-          window.scrollTo(0, target);
-          de.style.scrollBehavior = prevSB;
-        });
+        restoreScroll(target);
       } else if (jumpId) {
         const el = byId(jumpId);
         if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
