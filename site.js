@@ -603,7 +603,7 @@
     const top10 = jc && +jc.pct <= 10;
     const jName = p.j ? '<span class="pv-j' + (top10 ? ' pv-j--top' : '') + '">' + p.j + '</span>' : '';
     /* PDF 버튼 — files/publication/<인용키>.pdf 가 실제로 있으면 자동 표시 (checkPdfs가 확인) */
-    const pdfHref = p.key ? 'files/publication/' + encodeURIComponent(p.key) + '.pdf' : '';
+    //const pdfHref = p.key ? 'files/publication/' + encodeURIComponent(p.key) + '.pdf' : '';
     const pdfBtn = pdfHref
       ? ' <a class="pdf-btn" data-pdf="' + p.key + '" href="' + pdfHref + '" target="_blank" rel="noopener"' + (pdfState[p.key] ? '' : ' hidden') + '><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>PDF</a>'
       : '';
