@@ -733,3 +733,24 @@ a.paper__title--link:hover{color:var(--accent-strong);text-decoration:underline}
   *{animation:none!important;transition:none!important}
   .rise{opacity:1;transform:none}
 }
+
+/* International Journals — 연도 소제목(연도별 구분) */
+.pub-year{
+  position:relative;
+  font-family:var(--font-head);
+  font-size:30px;
+  font-weight:700;
+  letter-spacing:-1px;
+  color:var(--night);
+  margin:40px 0 16px;
+  padding-bottom:10px;
+  border-bottom:1px solid var(--line);
+  scroll-margin-top:90px;
+}
+.pub-year:first-child{ margin-top:4px; }
+.pub-year::after{
+  content:"";
+  position:absolute; left:0; bottom:-1px;
+  width:44px; height:3px;
+  background:var(--accent);
+}
