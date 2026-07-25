@@ -996,7 +996,12 @@
     let list;
     if (!on.length) list = progData.concat(journalsData);                    // 전체: In Progress 맨 위
     else list = (activeYears['inprogress'] ? progData : []).concat(journalsData.filter(p => activeYears[p.y]));
-    mount.innerHTML = list.map(p => p.prog ? progRow(p) : journalRow(p)).join('') || '<div class="board__empty">해당 조건의 논문이 없습니다.</div>';
+    let html = '', lastYear = null;
+    list.forEach(p => {
+      if (p.y !== lastYear) { html += '<h3 class="pub-year">' + p.y + '</h3>'; lastYear = p.y; }
+      html += p.prog ? progRow(p) : journalRow(p);
+    });
+    mount.innerHTML = html || '<div class="board__empty">해당 조건의 논문이 없습니다.</div>';
     revealPass();
     checkPdfs();
   }
