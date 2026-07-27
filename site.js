@@ -286,7 +286,7 @@
     const now = p.now ? '<div class="card-person__now"><span>Current Affiliation</span>' + p.now + '</div>' : '';
     const blocks =
       (interests ? '<div class="card-person__block"><h5>Research Interests</h5><p>' + interests + '</p></div>' : '') +
-      (edu.length ? '<div class="card-person__block"><h5>Education</h5><p>' + edu.join('<br>') + '</p></div>' : '') +
+      '' +
       (p.email ? '<div class="card-person__block card-person__mail"><h5>Email</h5><a href="mailto:' + p.email + '" onclick="event.stopPropagation()">' + p.email + '</a></div>' : '') +
       (p.cv ? '<div class="card-person__block">' + cvButton(p) + '</div>' : '');
     const rule = blocks ? '<div class="card-person__rule"></div>' : '';
