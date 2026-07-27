@@ -618,8 +618,8 @@
         cover = '<div class="paper__cover"><img loading="lazy" src="' + cb + '.jpg" data-base="' + cb + '" data-i="0" data-fb="remove" alt="Cover" onerror="neoImg(this)"></div>';
       }
     }
-    return '<div class="paper rise' + (cover ? ' paper--cover' : '') + '"><div class="paper__meta">' + p.y + stateBadge(p.state) + '</div>' +
-      '<div class="paper__main"><div class="paper__titleline">' + titleEl + revTag + '</div>' +
+    return '<div class="paper rise' + (cover ? ' paper--cover' : '') + '"><div class="paper__meta">' + p.y + stateBadge(p.state) + revTag + '</div>' +
+      '<div class="paper__main"><div class="paper__titleline">' + titleEl + '</div>' +
       '<div class="paper__authors">' + p.a + '</div>' +
       '<div class="paper__venue">' + jName + cite + pdfBtn + '</div></div>' + cover + '</div>';
   }
