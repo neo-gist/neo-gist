@@ -754,3 +754,6 @@ a.paper__title--link:hover{color:var(--accent-strong);text-decoration:underline}
   width:44px; height:3px;
   background:var(--accent);
 }
+
+/* Review 배지를 연도 칸 아래에 세로 정렬 */
+.paper__meta .rev-tag{ display:block; width:fit-content; margin:8px auto 0; }
