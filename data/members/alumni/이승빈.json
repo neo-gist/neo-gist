@@ -4,6 +4,10 @@
   "en": "Seungbin Lee",
   "init": "SL",
   "role": "M.S.",
+    "education": [
+    "M.S., EECS, GIST (2026)",
+    "B.S., EECS, GIST (2024)"
+  ],
   "period": "2024.03 - 2026.02",
   "now": "SK Hynix"
 }
