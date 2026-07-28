@@ -17,7 +17,7 @@
 <title>Nano Electronics &amp; Optoelectronics Lab — GIST</title>
 <link rel="icon" type="image/svg+xml" href="images/site/favicon.svg">
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
-<link rel="stylesheet" href="theme.css?rev=94">
+<link rel="stylesheet" href="theme.css?rev=96">
 <!-- [임시] International Journals 목록의 PDF 버튼 숨김 — 다시 켜려면 아래 <style> 한 줄을 삭제하세요 -->
 <!-- <style>.pdf-btn:not([data-pdf^="pat-"]){display:none !important}</style> -->
 </head>
@@ -210,13 +210,30 @@
     <div class="paper-set is-shown" id="pset-intl">
       <h2 class="pub-title">Papers</h2>
       <div class="papers-nav">
-        <button class="papers-nav__btn" data-papersview="highlights" type="button">Highlights</button>
-        <button class="papers-nav__btn is-active" data-papersview="full" type="button">Full Publication List</button>
+        <button class="papers-nav__btn is-active" data-papersview="highlights" type="button">Highlights</button>
+        <button class="papers-nav__btn" data-papersview="full" type="button">Full Publication List</button>
       </div>
-      <div class="papers-view" id="papersview-highlights" hidden>
-        <div class="board__empty">Highlights는 준비 중입니다.</div>
+      <div class="papers-view" id="papersview-highlights">
+        <div class="hl-wrap">
+          <div class="hl-list" id="hl-selected"></div>
+          <aside class="hl-side">
+            <div class="hl-side__head">
+              <h4 class="hl-side__t">Citations by Year</h4>
+              <div class="hl-side__tot" id="hl-cite-total"></div>
+            </div>
+            <div class="hl-chart-box">
+              <div class="cc-yaxis" id="hl-cite-axis"></div>
+              <div class="cc-plot">
+                <div class="cc-grid" id="hl-cite-grid"></div>
+                <div class="cc cc--mini" id="hl-cite-chart"></div>
+              </div>
+            </div>
+            <h4 class="hl-side__t hl-covers-t">Journal Covers</h4>
+            <div class="hl-covers-v" id="hl-covers-v"></div>
+          </aside>
+        </div>
       </div>
-      <div class="papers-view" id="papersview-full">
+      <div class="papers-view" id="papersview-full" hidden>
         <div class="year-filter" id="year-filter"></div>
         <div id="journal-list"></div>
       </div>
@@ -299,6 +316,6 @@
   </div>
 </footer>
 
-<script src="site.js?rev=78"></script>
+<script src="site.js?rev=81"></script>
 </body>
 </html>

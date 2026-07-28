@@ -599,6 +599,8 @@
       ? '<a class="paper__title paper__title--link" href="' + doiUrl + '" target="_blank" rel="noopener">' + p.t + '</a>'
       : '<span class="paper__title">' + p.t + '</span>';
     const revTag = p.review ? ' <span class="rev-tag">Review</span>' : '';
+    /* Highlight 태그 — ref.bib 의 selected={true} 논문에 표시. 정렬은 바꾸지 않음 */
+    const hlTag = p.selected ? ' <span class="hl-tag"><span class="hl-tag__s">★</span> Highlight</span>' : '';
     const jc = jcrInfo(p.j, p.y);
     const top10 = jc && +jc.pct <= 10;
     const jName = p.j ? '<span class="pv-j' + (top10 ? ' pv-j--top' : '') + '">' + p.j + '</span>' : '';
@@ -618,10 +620,113 @@
         cover = '<div class="paper__cover"><img loading="lazy" src="' + cb + '.jpg" data-base="' + cb + '" data-i="0" data-fb="remove" alt="Cover" onerror="neoImg(this)"></div>';
       }
     }
-    return '<div class="paper rise' + (cover ? ' paper--cover' : '') + '"><div class="paper__meta">' + p.y + stateBadge(p.state) + revTag + '</div>' +
+    return '<div class="paper rise' + (cover ? ' paper--cover' : '') + '"><div class="paper__meta">' + p.y + stateBadge(p.state) + revTag + hlTag + '</div>' +
       '<div class="paper__main"><div class="paper__titleline">' + titleEl + '</div>' +
       '<div class="paper__authors">' + p.a + '</div>' +
       '<div class="paper__venue">' + jName + cite + pdfBtn + '</div></div>' + cover + '</div>';
+  }
+
+  /* ===== Highlights — Selected 목록 + 연도별 인용 그래프 + 커버 세로 나열 ===== */
+  function hlPaperRow(p, n) {
+    var doiUrl = p.d ? (/^https?:/i.test(p.d) ? p.d : 'https://doi.org/' + p.d) : '';
+    var titleEl = doiUrl
+      ? '<a class="paper__title paper__title--link" href="' + doiUrl + '" target="_blank" rel="noopener">' + p.t + '</a>'
+      : '<span class="paper__title">' + p.t + '</span>';
+    var jc = jcrInfo(p.j, p.y);                          // JCR: 10% 이내면 빨간 저널명
+    var top10 = jc && +jc.pct <= 10;
+    var jName = p.j ? '<span class="pv-j' + (top10 ? ' pv-j--top' : '') + '">' + p.j + '</span>' : '';
+    var cite = p.cite ? ' <span class="pv-c">' + p.cite + '</span>' : '';
+    var hlTag = ' <span class="hl-tag"><span class="hl-tag__s">★</span> Highlight</span>';
+    var citeCol = '<div class="hl-cite"><span class="hl-cite__n">' + (n != null ? n : '—') + '</span><span class="hl-cite__l">citations</span></div>';
+    return '<div class="paper hl-paper rise"><div class="paper__meta">' + p.y + hlTag + '</div>' +
+      '<div class="paper__main"><div class="paper__titleline">' + titleEl + '</div>' +
+      '<div class="paper__authors">' + p.a + '</div>' +
+      '<div class="paper__venue">' + jName + cite + '</div></div>' + citeCol + '</div>';
+  }
+  /* 보기 좋은 y축 눈금 계산 (0부터 니스 스텝으로, 최댓값 위에 여유 확보) */
+  /* y축 최댓값을 데이터에 맞춰 100 단위로 자동 결정(눈금도 100 배수, 4~5칸) */
+  function niceTicks(max) {
+    if (!(max > 0)) return { ticks: [0, 100], top: 100 };
+    var top = Math.ceil((max * 1.06) / 100) * 100;                 // 툴팁 여유(약 6%) 후 100 단위로 올림
+    var step = 100;                                                // 눈금 간격 — 100 배수, 4~5칸 목표
+    while (top / step > 5) step += (step < 500 ? 100 : step < 2000 ? 500 : 1000);
+    top = Math.ceil(top / step) * step;                            // 최상단 눈금이 차트 꼭대기에 오도록 정렬
+    var t = []; for (var v = 0; v <= top + 1e-9; v += step) t.push(Math.round(v));
+    return { ticks: t, top: top };
+  }
+  function hlYearChart(chartEl, gridEl, axisEl, totalEl, byYear) {
+    if (!chartEl) return;
+    var years = Object.keys(byYear).map(Number).sort((a, b) => a - b);   // 전체 연도(스크롤로 과거 확인)
+    var max = Math.max.apply(null, years.map(y => byYear[y] || 0)) || 1;
+    var nt = niceTicks(max), top = nt.top;
+    if (axisEl) axisEl.innerHTML = nt.ticks.map(t => '<span class="cc-yaxis__l" style="top:' + (1 - t / top) * 100 + '%">' + t.toLocaleString() + '</span>').join('');
+    if (gridEl) gridEl.innerHTML = nt.ticks.map(t => '<span class="cc-grid__l" style="top:' + (1 - t / top) * 100 + '%"></span>').join('');
+    chartEl.innerHTML = years.map(function (y) {
+      var v = byYear[y] || 0, h = Math.max(1, Math.round(v / top * 100));
+      return '<div class="cc-col"><div class="cc-barwrap"><div class="cc-bar" style="height:' + h + '%"><span class="cc-tip">' + v.toLocaleString() + '</span></div></div>' +
+        '<div class="cc-y">' + String(y).slice(2) + '</div></div>';
+    }).join('');
+    if (totalEl) {
+      var total = years.reduce((s, y) => s + (byYear[y] || 0), 0);
+      totalEl.innerHTML = '<b>' + total.toLocaleString() + '</b> total';
+    }
+  }
+  function coverCellV(p) {
+    var href = p.d ? (/^https?:/i.test(p.d) ? p.d : 'https://doi.org/' + p.d) : '';
+    var img;
+    if (/\.[a-z0-9]+$/i.test(p.cover)) img = '<img loading="lazy" src="images/covers/' + u(p.cover) + '" alt="' + (p.t || '') + '" onerror="this.closest(\'.hlc\').style.display=\'none\'">';
+    else { var cb = 'images/covers/' + u(p.cover); img = '<img loading="lazy" src="' + cb + '.jpg" data-base="' + cb + '" data-i="0" data-fb="remove" alt="' + (p.t || '') + '" onerror="neoImg(this)">'; }
+    var open = href ? '<a class="hlc" href="' + href + '" target="_blank" rel="noopener" title="' + (p.t || '') + '">' : '<div class="hlc" title="' + (p.t || '') + '">';
+    var close = href ? '</a>' : '</div>';
+    return open + '<div class="hlc__frame">' + img + '</div>' + close;
+  }
+  /* citations.json(OpenAlex 자동 갱신) 조회 헬퍼 — DOI 로 매칭 */
+  function normDoi(d) { return String(d || '').trim().replace(/^https?:\/\/(dx\.)?doi\.org\//i, '').replace(/^doi:/i, '').toLowerCase(); }
+  function citeRec(p) { return (citeData && citeData.papers) ? citeData.papers[normDoi(p.d)] : null; }
+  function citeTotal(p) { var r = citeRec(p); return r ? r.total : null; }
+  function renderHighlights() {
+    var list = byId('hl-selected'); if (!list) return;
+    var sel = journalsData.filter(p => p.selected);          // ref.bib 의 selected={true} 논문
+    list.innerHTML = sel.map(p => hlPaperRow(p, citeTotal(p))).join('');
+    var byYear = (citeData && citeData.by_year) ? citeData.by_year : {};
+    var chart = byId('hl-cite-chart'), axis = byId('hl-cite-axis'), grid = byId('hl-cite-grid'), tot = byId('hl-cite-total');
+    if (Object.keys(byYear).length) {
+      if (axis) axis.style.visibility = '';
+      hlYearChart(chart, grid, axis, tot, byYear);
+    } else {
+      /* citations.json 이 아직 없거나 비어 있을 때(첫 Action 실행 전) 차분한 대기 표시 */
+      if (chart) chart.innerHTML = '<div class="cc-wait">인용 데이터 업데이트 대기 중…</div>';
+      if (grid) grid.innerHTML = '';
+      if (axis) { axis.innerHTML = ''; axis.style.visibility = 'hidden'; }
+      if (tot) tot.innerHTML = '';
+    }
+    var cv = byId('hl-covers-v');
+    if (cv) { cv.innerHTML = journalsData.filter(p => p.cover).map(coverCellV).join(''); }  // 최신순(위→아래)
+    revealPass();
+  }
+  /* 드래그로 가로 스크롤 */
+  function dragScrollX(el) {
+    if (!el || el._drag) return; el._drag = true;
+    var down = false, sx = 0, sl = 0;
+    el.addEventListener('pointerdown', function (e) { down = true; sx = e.clientX; sl = el.scrollLeft; el.classList.add('is-grabbing'); try { el.setPointerCapture(e.pointerId); } catch (x) {} });
+    el.addEventListener('pointermove', function (e) { if (down) el.scrollLeft = sl - (e.clientX - sx); });
+    var end = function () { down = false; el.classList.remove('is-grabbing'); };
+    el.addEventListener('pointerup', end); el.addEventListener('pointercancel', end);
+  }
+  /* 커버 영역 높이를 논문 목록 하단에 맞춤(넘치면 스크롤) */
+  function fitCovers() {
+    var list = byId('hl-selected'), cv = byId('hl-covers-v');
+    if (!list || !cv) return;
+    var lr = list.getBoundingClientRect(), cr = cv.getBoundingClientRect();
+    if (!lr.height) return;
+    var avail = lr.bottom - cr.top;
+    if (avail > 160) cv.style.maxHeight = Math.floor(avail) + 'px';
+  }
+  /* Highlights 뷰가 보일 때 초기화: 그래프는 최신(오른쪽)부터, 커버 높이 맞춤 */
+  function initHighlightsView() {
+    var chart = byId('hl-cite-chart');
+    if (chart) { dragScrollX(chart); chart.scrollLeft = chart.scrollWidth; }
+    fitCovers();
   }
 
   /* ==========================================================================
@@ -694,6 +799,7 @@
       return { _i: idx, y: y, prog: /in\s*progress/i.test(y), state: bibClean(f.state || ''),
         a: fa.join(', '), t: bibClean(f.title || ''), v: venue, cite: cite, d: f.doi || '', j: journal,
         review: /review/i.test(f.type || ''), cover: bibClean(f.cover || ''),
+        selected: /true|1|yes/i.test(f.selected || ''),   // Highlights 목록에 넣을 논문
         key: bibKey, pdf: bibClean(f.pdf || ''), keyword: bibClean(f.keyword || ''),
         leadNorms: leadNorms, allNorms: allNorms };
     }).filter(p => p.a || p.t);
@@ -757,6 +863,11 @@
       : viewId === 'view-research-detail' ? 'view-research' : viewId;
     menuLinks.forEach(l => l.classList.toggle('is-current', l.dataset.view === key));
     if (viewId === 'view-pubs' && filter) applyFilter(filter);
+    /* Publications 로 들어오면 기본 뷰인 Highlights 초기화(그래프 최신쪽 정렬·커버 높이 맞춤) */
+    if (viewId === 'view-pubs') {
+      var hv = byId('papersview-highlights');
+      if (hv && !hv.hidden) setTimeout(initHighlightsView, 80);
+    }
     if (!suppressHistory) {
       /* 멤버 상세로 들어갈 때 — 떠나는 목록 기록에 "그 카드로 돌아갈 위치"를 남겨둠.
          (뒤로가기 하면 저장된 mcard-<id> 카드로 이동. 나머지 화면은 스크롤 복원 없음) */
@@ -891,8 +1002,13 @@
     var v = btn.dataset.papersview;
     qsa('.papers-nav__btn').forEach(b => b.classList.toggle('is-active', b === btn));
     qsa('.papers-view').forEach(pv => { pv.hidden = (pv.id !== 'papersview-' + v); });
+    if (v === 'highlights') setTimeout(initHighlightsView, 60);
     setTimeout(revealPass, 40);
   }));
+  window.addEventListener('resize', function () {
+    if (!byId('papersview-highlights') || byId('papersview-highlights').hidden) return;
+    fitCovers();
+  });
 
   /* ---------- 모바일 슬라이드 메뉴 ---------- */
   const sheet = byId('sheet');
@@ -952,6 +1068,7 @@
   let journalsData = [];   // 연도 있는 저널 (연도 내림차순)
   let patentsData = [];    // 특허 (멤버 페이지 저자 매칭용)
   let progData = [];       // year=In Progress
+  let citeData = null;     // data/publications/citations.json (OpenAlex 자동 갱신)
   const activeYears = {};  // 'inprogress' 또는 연도값 → true
   const expandedBk = {};   // 펼쳐진 옛 구간(bucketStart) → true
   /* 연도를 5년 단위 구간으로 묶기 (최소연도 기준 정렬, 최신 구간은 항상 펼침) */
@@ -1204,9 +1321,9 @@
      부트스트랩
      ========================================================================== */
   async function boot() {
-    let members, projects, papers, news, bibText, jcrRaw, facility, areas, partners;
+    let members, projects, papers, news, bibText, jcrRaw, facility, areas, partners, citations;
     try {
-      [members, projects, papers, news, bibText, jcrRaw, facility, areas, partners] = await Promise.all([
+      [members, projects, papers, news, bibText, jcrRaw, facility, areas, partners, citations] = await Promise.all([
         fetchMembers(),
         fetchJSON('research/projects.json'),
         fetchJSON('publications/patents.json'),
@@ -1215,13 +1332,15 @@
         fetchJSON('publications/jcr.json').catch(() => ({})),
         fetchJSON('research/facility.json').catch(() => []),
         fetchJSON('research/areas.json').catch(() => []),
-        fetchJSON('research/partners.json').catch(() => ({}))
+        fetchJSON('research/partners.json').catch(() => ({})),
+        fetchJSON('publications/citations.json').catch(() => null)   // OpenAlex 자동 갱신(없으면 대기 표시)
       ]);
     } catch (err) {
       console.error(err);
       return;
     }
     partnerLogos = partners || {};
+    citeData = citations || null;
     /* JCR: 저널명을 정규화한 조회표로 변환 */
     Object.keys(jcrRaw || {}).forEach(yr => {
       JCR[yr] = {};
@@ -1270,6 +1389,8 @@
       (intlPat.length ? '<h3 class="pat-head">International</h3>' + intlPat.map(patentRow).join('') : '') +
       (domPat.length ? '<h3 class="pat-head">Domestic (Korea)</h3>' + domPat.map(patentRow).join('') : '');
     checkPdfs();
+
+    renderHighlights();   // Highlights(목업)
 
     revealPass();
 
