@@ -4,6 +4,9 @@
   "en": "Seongil Yun",
   "init": "SY",
   "role": "M.S. Student",
+  "education": [
+    "B.S., EECS, GIST (2025)"
+  ],
   "admit": "2025-03",
   "email": "sungil7710@gm.gist.ac.kr"
 }
