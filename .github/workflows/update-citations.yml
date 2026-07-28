@@ -1,0 +1,48 @@
+name: Update citations
+
+# 매일 논문 인용수를 OpenAlex 에서 받아 data/publications/citations.json 을 갱신한다.
+on:
+  schedule:
+    - cron: '0 18 * * *'          # 매일 UTC 18:00 = 한국시간 새벽 03:00
+  workflow_dispatch:              # Actions 탭에서 수동 실행("Run workflow")
+  push:
+    paths:                        # 설정 파일을 처음 올릴 때 자동으로 1회 실행
+      - 'scripts/update-citations.mjs'
+      - '.github/workflows/update-citations.yml'
+
+# 결과 json 을 저장소에 커밋하려면 쓰기 권한 필요
+permissions:
+  contents: write
+
+concurrency:
+  group: update-citations
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Fetch citations from OpenAlex
+        env:
+          OPENALEX_MAILTO: zzzrkd32@gmail.com
+        run: node scripts/update-citations.mjs
+
+      - name: Commit if changed
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/publications/citations.json
+          if git diff --staged --quiet; then
+            echo "변경 없음 — 커밋 생략"
+          else
+            git commit -m "chore: update citations.json [skip ci]"
+            git push
+          fi
