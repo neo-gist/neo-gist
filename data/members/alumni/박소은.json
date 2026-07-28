@@ -4,6 +4,10 @@
   "en": "Soeun Park",
   "init": "SP",
   "role": "M.S.",
+  "education": [
+    "M.S., EECS, GIST (2025)",
+    "B.S., EE, Keimyung University (2023)"
+  ],
   "period": "2023.03 - 2025.02",
   "now": "한국나노기술원"
 }
