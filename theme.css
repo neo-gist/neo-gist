@@ -757,3 +757,12 @@ a.paper__title--link:hover{color:var(--accent-strong);text-decoration:underline}
 
 /* Review 배지를 연도 칸 아래에 세로 정렬 */
 .paper__meta .rev-tag{ display:block; width:fit-content; margin:8px auto 0; }
+
+/* Publications 섹션 제목 (Papers / Patents) */
+.pub-title{font-family:var(--font-head);font-size:30px;font-weight:800;letter-spacing:-0.8px;color:var(--night);margin:0 0 20px}
+
+/* Papers 하위 전환 버튼 (Highlights / Full Publication List) */
+.papers-nav{display:inline-flex;gap:6px;background:var(--mist);border:1px solid var(--line-2);border-radius:100px;padding:5px;margin-bottom:28px}
+.papers-nav__btn{font-family:var(--font-head);font-size:14px;font-weight:700;color:var(--coal);background:none;border:none;border-radius:100px;padding:8px 18px;cursor:pointer;transition:.15s;white-space:nowrap}
+.papers-nav__btn.is-active{background:var(--night);color:#fff}
+.papers-nav__btn:not(.is-active):hover{color:var(--night)}

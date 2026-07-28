@@ -886,6 +886,14 @@
     setTimeout(revealPass, 40);
   }));
 
+  /* Papers 하위 전환: Highlights / Full Publication List */
+  qsa('.papers-nav__btn').forEach(btn => btn.addEventListener('click', () => {
+    var v = btn.dataset.papersview;
+    qsa('.papers-nav__btn').forEach(b => b.classList.toggle('is-active', b === btn));
+    qsa('.papers-view').forEach(pv => { pv.hidden = (pv.id !== 'papersview-' + v); });
+    setTimeout(revealPass, 40);
+  }));
+
   /* ---------- 모바일 슬라이드 메뉴 ---------- */
   const sheet = byId('sheet');
   function closeSheet() { sheet.classList.remove('is-open'); }
@@ -1258,7 +1266,7 @@
     patentsData = pats;
     const intlPat = pats.filter(p => patRegion(p) === 'intl');
     const domPat = pats.filter(p => patRegion(p) === 'domestic');
-    byId('pset-patent').innerHTML =
+    byId('patent-list').innerHTML =
       (intlPat.length ? '<h3 class="pat-head">International</h3>' + intlPat.map(patentRow).join('') : '') +
       (domPat.length ? '<h3 class="pat-head">Domestic (Korea)</h3>' + domPat.map(patentRow).join('') : '');
     checkPdfs();
