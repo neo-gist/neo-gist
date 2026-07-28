@@ -4,6 +4,10 @@
   "en": "Yongduck Jung",
   "init": "YJ",
   "role": "Post-Doc",
+    "education": [
+    "Ph.D., Nanyang Technological University (2022)",
+    "B.S., Inha University (-)"
+  ],
   "period": "2022.07 - 2023.02",
   "now": "Samsung Electronics DS"
 }
