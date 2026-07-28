@@ -713,13 +713,17 @@
     var end = function () { down = false; el.classList.remove('is-grabbing'); };
     el.addEventListener('pointerup', end); el.addEventListener('pointercancel', end);
   }
-  /* 커버 영역 높이를 논문 목록 하단에 맞춤(넘치면 스크롤) */
+  /* 커버 영역 높이를 왼쪽 논문 목록 하단에 맞춤(넘치면 세로 스크롤).
+     레이아웃이 아직 안 잡혔으면(높이 0) 건드리지 않고 다음 호출/옵서버에 맡김. */
   function fitCovers() {
     var list = byId('hl-selected'), cv = byId('hl-covers-v');
     if (!list || !cv) return;
+    var pv = byId('papersview-highlights');
+    if (pv && pv.hidden) return;                     // Highlights 뷰가 숨겨져 있으면 측정 무의미
+    if (window.innerWidth <= 820) { cv.style.maxHeight = ''; return; }  // 모바일: 높이 제한 없이 그리드로 전부 표시
     var lr = list.getBoundingClientRect(), cr = cv.getBoundingClientRect();
-    if (!lr.height) return;
-    var avail = lr.bottom - cr.top;
+    if (!lr.height || !cr.width) return;             // 아직 화면에 안 그려짐 → 나중에 다시
+    var avail = lr.bottom - cr.top;                  // 커버 상단 ~ 목록 하단
     if (avail > 160) cv.style.maxHeight = Math.floor(avail) + 'px';
   }
   /* Highlights 뷰가 보일 때 초기화: 그래프는 최신(오른쪽)부터, 커버 높이 맞춤 */
@@ -727,6 +731,20 @@
     var chart = byId('hl-cite-chart');
     if (chart) { dragScrollX(chart); chart.scrollLeft = chart.scrollWidth; }
     fitCovers();
+    /* 화면 전환·폰트·이미지 로딩 때문에 레이아웃이 늦게 잡힐 수 있어 여러 번 재측정 */
+    [60, 200, 500, 1000].forEach(function (t) { setTimeout(fitCovers, t); });
+    /* 왼쪽 목록 크기가 바뀔 때마다(리플로우 포함) 자동으로 다시 맞춤 */
+    var list = byId('hl-selected');
+    if (list && window.ResizeObserver && !list._roCovers) {
+      list._roCovers = new ResizeObserver(function () { fitCovers(); });
+      list._roCovers.observe(list);
+    }
+    /* 커버 이미지가 로드되며 오른쪽 열 위치가 바뀌는 경우도 반영 */
+    var cv = byId('hl-covers-v');
+    if (cv && !cv._imgHook) {
+      cv._imgHook = 1;
+      qsa('#hl-covers-v img').forEach(function (im) { im.addEventListener('load', fitCovers, { once: true }); });
+    }
   }
 
   /* ==========================================================================

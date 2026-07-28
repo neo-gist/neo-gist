@@ -814,7 +814,17 @@ a.paper__title--link:hover{color:var(--accent-strong);text-decoration:underline}
 .hlc:hover .hlc__frame img{transform:scale(1.04)}
 
 @media(max-width:820px){
+  /* 모바일: Citations by Year → Journal Covers → 논문 목록 순서로 */
   .hl-wrap{grid-template-columns:1fr;gap:26px}
-  .hl-covers-v{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .hl-side{order:1}
+  .hl-list{order:2}
+  .hl-covers-v{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;max-height:none!important;overflow:visible}
   .hl-covers-t{margin-top:24px}
+  /* 논문 행: 3열 그리드 대신 한 줄로 스택(제목이 눌리지 않게) */
+  .hl-paper{grid-template-columns:1fr;gap:8px}
+  .hl-paper .paper__meta{display:flex;align-items:center;gap:10px;text-align:left}
+  .hl-paper .hl-tag{margin:0}
+  .hl-cite{align-self:start;text-align:left;padding-left:0;margin-top:2px}
+  .hl-cite__n{display:inline;font-size:14px}
+  .hl-cite__l{display:inline;margin:0 0 0 5px}
 }
