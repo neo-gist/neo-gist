@@ -204,3 +204,32 @@
     }
   }
 }
+
+  "2025": {
+    "ACS Applied Materials and Interfaces": {
+      "field": "Materials Science, Multidisciplinary",
+      "pct": 18.0,
+      "rank": "83/461"
+    },
+    "Advanced Functional Materials": {
+      "field": "Physics, Applied",
+      "pct": 4.5,
+      "rank": "9/191"
+    },
+    "Advanced Materials": {
+      "field": "Materials Science, Multidisciplinary",
+      "pct": 2.0,
+      "rank": "10/472"
+    },
+    "Nano Letters": {
+      "field": "Physics, Applied",
+      "pct": 13.9,
+      "rank": "27/191"
+    },
+    "npj 2D Materials and Applications": {
+      "field": "Physics, Applied",
+      "pct": 13.9,
+      "rank": "26/187"
+    }
+  }
+}
