@@ -355,9 +355,6 @@ img{max-width:100%;display:block}
 .tag{font-size:11px;font-weight:700;color:var(--coal);background:var(--mist);border-radius:var(--pill);padding:4px 10px;letter-spacing:-0.1px}
 
 /* ----- 논문 ----- */
-.paper-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:36px}
-.paper-tab{font-size:14px;font-weight:700;padding:9px 18px;border-radius:var(--pill);background:var(--mist);color:var(--gray);cursor:pointer;border:1px solid transparent;transition:.18s}
-.paper-tab.is-active{background:var(--night);color:#fff}
 .paper-set{display:none}
 .paper-set.is-shown{display:block}
 .paper{display:grid;grid-template-columns:108px 1fr;gap:20px;align-items:start;padding:22px 0;border-bottom:1px solid var(--line-2)}

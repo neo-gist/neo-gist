@@ -276,7 +276,6 @@
 
   function personCard(p) {
     const interests = (p.ri || []).filter(Boolean).join(', ');
-    const edu = (p.education || []).filter(Boolean);
     const face = (p.init || '') + memberFaceImg(p);
     const nameLine = p.en
       ? p.en + ' <span class="card-person__ko">(' + p.ko + ')</span>'
@@ -439,7 +438,7 @@
   /* ==========================================================================
      상세 — Activity 공용 기사
      ========================================================================== */
-  function entryMeta(type, n) {
+  function entryMeta(n) {
     const bits = [];
     bits.push('<span class="chip">' + catLabel(n) + '</span>');
     if (n.posted) bits.push('<span class="entry__date">Posted ' + prettyDate(n.posted) + '</span>');
@@ -478,7 +477,7 @@
     byId('entry-mount').innerHTML =
       '<div class="trail"><a data-view="view-news" data-jump="' + sec.anchor + '">' + sec.label + '</a> › <span>' + richInline(n.title) + '</span></div>' +
       '<h1>' + richInline(n.title) + '</h1>' +
-      '<div class="entry__meta">' + entryMeta(type, n) + '</div>' +
+      '<div class="entry__meta">' + entryMeta(n) + '</div>' +
       hero + body + files + cta +
       '<button class="return" data-view="view-news" data-jump="' + sec.anchor + '">← Back to ' + sec.label + '</button>';
     navigate('view-entry', null, null, { detail: 'article', atype: type, id: id });
@@ -868,7 +867,6 @@
   const menuLinks = qsa('.menu__link');
 
   function applyFilter(key) {
-    qsa('.paper-tab').forEach(t => t.classList.toggle('is-active', t.dataset.filter === key));
     qsa('.paper-set').forEach(s => s.classList.remove('is-shown'));
     const set = byId('pset-' + key);
     if (set) set.classList.add('is-shown');
@@ -876,9 +874,8 @@
 
   function navigate(viewId, jumpId, filter, extraState) {
     screens.forEach(s => s.classList.toggle('is-active', s.id === viewId));
-    const key = viewId === 'view-entry' ? 'view-activity'
-      : viewId === 'view-bio' ? 'view-members'
-      : viewId === 'view-research-detail' ? 'view-research' : viewId;
+    /* 상세 화면(bio/entry/research-detail)은 부모 탭을 현재 메뉴로 표시 */
+    const key = VIEW_PARENT[viewId] || viewId;
     menuLinks.forEach(l => l.classList.toggle('is-current', l.dataset.view === key));
     if (viewId === 'view-pubs' && filter) applyFilter(filter);
     /* Publications 로 들어오면 기본 뷰인 Highlights 초기화(그래프 최신쪽 정렬·커버 높이 맞춤) */
@@ -1009,12 +1006,6 @@
     }
   });
 
-  /* 논문 탭 (data-view 가 없는 페이지 내 탭 버튼) */
-  qsa('.paper-tab').forEach(tab => tab.addEventListener('click', () => {
-    applyFilter(tab.dataset.filter);
-    setTimeout(revealPass, 40);
-  }));
-
   /* Papers 하위 전환: Highlights / Full Publication List */
   qsa('.papers-nav__btn').forEach(btn => btn.addEventListener('click', () => {
     var v = btn.dataset.papersview;
@@ -1072,15 +1063,19 @@
 
   /* ---------- 논문 필터 (In Progress + 연도, 다중 선택) ---------- */
   const pdfState = {};     // 인용키 → true(PDF 있음)/false(없음). 1회 확인 후 캐시
-  /* files/publication/<key>.pdf 존재 여부를 확인해 있으면 버튼 표시 */
+  const pdfPending = {};   // 인용키 → 진행 중인 확인 요청. 같은 키를 중복 조회하지 않음
+  /* files/publication/<key>.pdf 존재 여부를 확인해 있으면 버튼 표시.
+     한 화면에 같은 논문이 여러 번 나와도(목록 + Related 등) 요청은 키당 한 번만 나감. */
   function checkPdfs() {
     qsa('.pdf-btn').forEach(a => {
       const k = a.dataset.pdf;
-      if (pdfState[k] === true) { a.hidden = false; return; }
-      if (pdfState[k] === false) { a.hidden = true; return; }
-      fetch(a.getAttribute('href'), { method: 'HEAD' })
-        .then(r => { pdfState[k] = r.ok; a.hidden = !r.ok; })
-        .catch(() => { pdfState[k] = false; a.hidden = true; });
+      if (pdfState[k] !== undefined) { a.hidden = !pdfState[k]; return; }
+      const req = pdfPending[k] || (pdfPending[k] =
+        fetch(a.getAttribute('href'), { method: 'HEAD' })
+          .then(r => r.ok)
+          .catch(() => false)
+          .then(ok => { pdfState[k] = ok; delete pdfPending[k]; return ok; }));
+      req.then(ok => { a.hidden = !ok; });
     });
   }
   let journalsData = [];   // 연도 있는 저널 (연도 내림차순)
