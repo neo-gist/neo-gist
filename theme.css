@@ -233,7 +233,12 @@ img{max-width:100%;display:block}
 .cta-panel .button{margin-top:28px;position:relative;z-index:2}
 
 /* ----- 교수 소개 ----- */
-.lead-prof{display:grid;grid-template-columns:225px 1fr;gap:40px;align-items:start;background:var(--mist);border-radius:var(--rad-2xl);padding:40px}
+.lead-prof{display:grid;grid-template-columns:225px 1fr;gap:40px;align-items:start;background:var(--mist);border-radius:var(--rad-2xl);padding:40px;position:relative;cursor:pointer;transition:.2s ease;scroll-margin-top:90px}
+.lead-prof:hover{box-shadow:var(--shadow-card)}
+.lead-prof:empty{display:none}
+.lead-prof__ko{font-weight:700;font-size:.7em;color:var(--night)}
+.lead-prof__more{position:absolute;right:34px;bottom:28px;font-size:13px;font-weight:700;color:var(--gray-2);transition:.18s}
+.lead-prof:hover .lead-prof__more{color:var(--accent-strong)}
 .lead-prof__photo{width:210px;aspect-ratio:3/4;border-radius:var(--rad-xl);background:linear-gradient(140deg,#2a2b28,#D42A1A);display:grid;place-items:center;color:#fff;font-family:var(--font-head);font-size:63px;font-weight:600;letter-spacing:-2px;position:relative;overflow:hidden}
 .lead-prof__photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .lead-prof__body h3{font-size:30px;font-weight:700;color:var(--night);letter-spacing:-0.6px}
@@ -645,6 +650,37 @@ a.paper__title--link:hover{color:var(--accent-strong);text-decoration:underline}
 .bio-edu li{position:relative;padding-left:18px;font-size:15.5px;line-height:1.7;color:var(--coal)}
 .bio-edu li::before{content:"";position:absolute;left:2px;top:11px;width:5px;height:5px;border-radius:50%;background:var(--accent)}
 .bio-story{margin-top:28px;border-top:1px solid var(--line-2);padding-top:24px}
+
+/* ----- 교수 상세 — 목록 / 배지 / 타임라인 ----- */
+.bio-photo--prof{background:linear-gradient(140deg,#2a2b28,#D42A1A)}
+.prof-dept{font-size:14.5px;color:var(--coal);line-height:1.65;margin-top:14px}
+.bio-head .prof-links{margin-top:18px}
+.bio-line__v--plain{color:var(--coal);font-weight:500}
+.plist{display:flex;flex-direction:column}
+.plist__row{display:grid;grid-template-columns:78px 1fr;gap:18px;padding:12px 0;border-bottom:1px solid var(--line-2);align-items:start}
+.plist__row:last-child{border-bottom:none}
+.plist__k{font-family:var(--font-head);font-size:14px;font-weight:700;color:var(--gray-2);padding-top:2px}
+.plist__t{font-size:15.5px;color:var(--night);line-height:1.5}
+.plist__t b{font-weight:600}
+.plist__s{font-size:14px;color:var(--gray);margin-top:4px;line-height:1.55}
+.plist__n{font-size:13px;color:var(--gray-2);margin-top:4px;line-height:1.55}
+.plist__link{color:var(--accent-strong);font-weight:600}
+.plist__link:hover{text-decoration:underline}
+.pbadge{display:inline-flex;align-items:center;font-size:11.5px;font-weight:700;letter-spacing:.2px;border-radius:var(--pill);padding:3px 10px;line-height:1.35;white-space:nowrap}
+.pbadge--invited{color:var(--accent-strong);background:var(--accent-tint);border:1px solid rgba(212,42,26,.22)}
+.pbadge--contrib{color:var(--gray);background:var(--mist);border:1px solid var(--line)}
+.pbadge--advisory{color:#0C447C;background:#E6F1FB;border:1px solid rgba(12,68,124,.18)}
+.pbadge--committee{color:#3C3489;background:#EEEDFE;border:1px solid rgba(60,52,137,.18)}
+.pbadge--media{color:#0F6E56;background:#E1F5EE;border:1px solid rgba(15,110,86,.18)}
+.ptimeline{border-left:2px solid var(--line-2);padding-left:20px}
+.ptimeline__row{padding:10px 0}
+.bio-sec .rel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.bio-sec .rel-head h3{margin-bottom:0}
+@media(max-width:720px){
+  .plist__row{grid-template-columns:1fr;gap:6px}
+  .lead-prof__more{position:static;display:block;margin-top:18px}
+}
+
 .bio-story p{font-size:16px;line-height:1.85;color:var(--coal);margin:18px 0}
 .bio-video{margin:20px 0}
 .bio-video video{width:100%;max-width:360px;border-radius:var(--rad);display:block;background:#000}

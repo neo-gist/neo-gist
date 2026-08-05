@@ -1,0 +1,82 @@
+{
+  "id": "donghokang",
+  "ko": "강동호",
+  "en": "Dong-Ho Kang",
+  "init": "DK",
+  "role": "Associate Professor, Ph.D.",
+  "dept": [
+    "Department of Semiconductor Engineering",
+    "Department of Electrical Engineering and Computer Science (EECS)",
+    "Gwangju Institute of Science &amp; Technology (GIST), Republic of Korea"
+  ],
+  "img": "donghokang.jpg",
+  "contact": {
+    "email": "donghokang@gist.ac.kr",
+    "tel": "+82-62-715-2638",
+    "office": ""
+  },
+  "links": [
+    {
+      "label": "Curriculum Vitae",
+      "url": "files/cv/donghokang.pdf"
+    },
+    {
+      "label": "Google Scholar",
+      "url": "https://scholar.google.co.kr/citations?user=3Kmdb4UAAAAJ&hl=ko"
+    },
+    {
+      "label": "LinkedIn",
+      "url": "https://www.linkedin.com/in/dong-ho-kang-75b5bb187/"
+    },
+    {
+      "label": "ORCID",
+      "url": ""
+    }
+  ],
+  "education": [
+    {
+      "y": "2019",
+      "deg": "M.S. / Ph.D.",
+      "org": "Sungkyunkwan University",
+      "major": "Electronic &amp; Electrical Engineering",
+      "note": "Dissertation: Process Technology for 2D Semiconducting Devices (Advisor: Prof. Jin-Hong Park)"
+    },
+    {
+      "y": "2014",
+      "deg": "B.S.",
+      "org": "Sungkyunkwan University",
+      "major": "Electronic &amp; Electrical Engineering",
+      "note": ""
+    }
+  ],
+  "experience": [
+    {
+      "role": "Associate Professor",
+      "org": "Gwangju Institute of Science &amp; Technology",
+      "unit": "Department of Semiconductor Engineering",
+      "period": "Mar. 2026 – Present",
+      "short": "GIST"
+    },
+    {
+      "role": "Assistant Professor",
+      "org": "Gwangju Institute of Science &amp; Technology",
+      "unit": "Department of Semiconductor Engineering",
+      "period": "Mar. 2025 – Feb. 2026",
+      "short": "GIST"
+    },
+    {
+      "role": "Assistant Professor",
+      "org": "Gwangju Institute of Science &amp; Technology",
+      "unit": "School of Electrical Engineering &amp; Computer Science",
+      "period": "Nov. 2021 – Feb. 2025",
+      "short": "GIST"
+    },
+    {
+      "role": "Research Fellow",
+      "org": "Nanyang Technological University",
+      "unit": "School of Electrical &amp; Electronic Engineering (Supervisor: Prof. Donguk Nam)",
+      "period": "Mar. 2019 – Sep. 2021",
+      "short": "NTU, Singapore"
+    }
+  ]
+}

@@ -343,6 +343,197 @@
   }
 
   /* ==========================================================================
+     Professor — data/members/professor/ 의 4개 파일로 카드와 상세 페이지를 구성
+     profile.json(기본) · service.json(학회활동·수상) · talks.json(발표) · engagement.json(대외활동)
+     ========================================================================== */
+  const prof = { profile: null, service: null, talks: [], engagement: [] };
+
+  /* 외부 링크 아이콘 — label 로 매칭, 없으면 일반 링크 아이콘 */
+  const LINK_ICONS = {
+    'curriculum vitae': '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/>',
+    'cv':               '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/>',
+    'google scholar':   '<path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/>',
+    'linkedin':         '<rect x="2" y="2" width="20" height="20" rx="2"/><path d="M7 10v7M7 7v.01M11 17v-4a2 2 0 0 1 4 0v4M15 17v-7"/>',
+    'orcid':            '<circle cx="12" cy="12" r="10"/><path d="M8 8v8M8 5.5v.01M12 10h2a3 3 0 0 1 0 6h-2v-6Z"/>',
+    '_':                '<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>'
+  };
+  function linkBtn(L) {
+    if (!L || !L.url) return '';
+    const path = LINK_ICONS[(L.label || '').toLowerCase()] || LINK_ICONS._;
+    return '<a class="cv-btn" href="' + L.url + '" target="_blank" rel="noopener" onclick="event.stopPropagation()">' +
+      '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + path + '</svg> ' +
+      L.label + '</a>';
+  }
+  function profLinks(p) {
+    const html = (p.links || []).map(linkBtn).join('');
+    return html ? '<div class="prof-links">' + html + '</div>' : '';
+  }
+
+  /* 목록 한 줄 — 왼쪽 라벨(연도/배지) + 오른쪽 제목·부제·비고 */
+  function pRow(k, t, s, n) {
+    return '<div class="plist__row"><div class="plist__k">' + (k || '') + '</div><div>' +
+      '<div class="plist__t">' + (t || '') + '</div>' +
+      (s ? '<div class="plist__s">' + s + '</div>' : '') +
+      (n ? '<div class="plist__n">' + n + '</div>' : '') +
+      '</div></div>';
+  }
+  function pSec(title, inner) {
+    return inner ? '<div class="bio-sec"><h3>' + title + '</h3>' + inner + '</div>' : '';
+  }
+  const byYearDesc = (a, b) => String(b.y || '').localeCompare(String(a.y || ''));
+
+  /* ---------- 메인 카드 (Members 화면 상단) ---------- */
+  function paintProfessorCard() {
+    const mount = byId('lead-prof');
+    const p = prof.profile;
+    if (!mount) return;
+    if (!p) { mount.style.display = 'none'; return; }
+    const face = '<div class="lead-prof__photo">' +
+      (p.img ? '<img src="images/members/' + u(p.img) + '" alt="' + (p.en || '') + '" onerror="this.remove()">' : '') +
+      (p.init || '') + '</div>';
+    const dept = [].concat(p.dept || []).filter(Boolean);
+    const eduLi = (p.education || []).map(e =>
+      '<li>' + (e.deg ? '<b>' + e.deg + '</b> ' : '') + [e.major, e.org].filter(Boolean).join(', ') +
+      (e.y ? ' (' + e.y + ')' : '') + '</li>').join('');
+    const expLi = (p.experience || []).map(x =>
+      '<li>' + x.role + ', <b>' + (x.short || x.org) + '</b>' + (x.unit ? ' — ' + x.unit : '') +
+      (x.period ? ' (' + x.period + ')' : '') + '</li>').join('');
+    mount.innerHTML = face +
+      '<div class="lead-prof__body">' +
+        '<h3>' + (p.en || '') + (p.role && /ph\.?d/i.test(p.role) ? ', Ph.D.' : '') +
+          ' <span class="lead-prof__ko">' + (p.ko || '') + '</span></h3>' +
+        '<div class="lead-prof__role">' + String(p.role || '').replace(/,\s*Ph\.?D\.?$/i, '') + '</div>' +
+        '<div class="lead-prof__meta">' + dept.join('<br>') +
+          (p.contact && p.contact.email
+            ? '<br>E-mail: <a href="mailto:' + p.contact.email + '" onclick="event.stopPropagation()">' + p.contact.email + '</a>'
+            : '') +
+        '</div>' +
+        '<div class="lead-prof__cred">' +
+          (expLi ? '<div class="lp-cred"><h5>Professional Experience</h5><ul>' + expLi + '</ul></div>' : '') +
+          (eduLi ? '<div class="lp-cred"><h5>Education</h5><ul>' + eduLi + '</ul></div>' : '') +
+        '</div>' +
+        profLinks(p) +
+      '</div>' +
+      '<span class="lead-prof__more">See More →</span>';
+  }
+
+  /* ---------- Invited Talks — 5건씩 페이지 넘김 ---------- */
+  const TALK_PAGE_SIZE = 5;
+  let talkPage = 0;
+  const TALK_BADGE = { invited: 'pbadge--invited', keynote: 'pbadge--invited', plenary: 'pbadge--invited' };
+  function talkRow(t) {
+    const kind = String(t.type || '').toLowerCase();
+    const cls = TALK_BADGE[kind] || 'pbadge--contrib';
+    const label = t.type || 'Talk';
+    const meta = [t.place, t.date].filter(Boolean).join(' · ');
+    return '<div class="plist__row"><div class="plist__k"><span class="pbadge ' + cls + '">' + label + '</span></div><div>' +
+      '<div class="plist__t">' + t.t + '</div>' +
+      (t.conf ? '<div class="plist__s">' + t.conf + '</div>' : '') +
+      (meta || t.y ? '<div class="plist__n">' + (meta || t.y) + '</div>' : '') +
+      '</div></div>';
+  }
+  function renderTalks() {
+    const mount = byId('prof-talks');
+    if (!mount) return;
+    const all = prof.talks;
+    const pages = Math.max(1, Math.ceil(all.length / TALK_PAGE_SIZE));
+    talkPage = Math.max(0, Math.min(talkPage, pages - 1));
+    const s = talkPage * TALK_PAGE_SIZE;
+    mount.innerHTML = all.slice(s, s + TALK_PAGE_SIZE).map(talkRow).join('');
+    const pg = byId('prof-talks-pager');
+    if (pg) pg.innerHTML = relPagerHTML('talks', talkPage, pages);
+  }
+
+  /* ---------- 상세 페이지 ---------- */
+  const ENGAGE = {
+    advisory:  { cls: 'pbadge--advisory',  label: 'Advisory' },
+    committee: { cls: 'pbadge--committee', label: 'Committee' },
+    media:     { cls: 'pbadge--media',     label: 'Media' }
+  };
+  function openProfessor() {
+    const p = prof.profile;
+    if (!p) return;
+    const sv = prof.service || {};
+
+    const face = '<div class="bio-photo bio-photo--prof">' +
+      (p.init || '') +
+      (p.img ? '<img src="images/members/' + u(p.img) + '" alt="' + (p.en || '') + '" onerror="this.remove()">' : '') +
+      '</div>';
+    const dept = [].concat(p.dept || []).filter(Boolean);
+    const c = p.contact || {};
+    const contact =
+      (c.email ? '<div class="bio-line"><span class="bio-line__k">Email</span><a class="bio-line__v" href="mailto:' + c.email + '">' + c.email + '</a></div>' : '') +
+      (c.tel ? '<div class="bio-line"><span class="bio-line__k">Tel</span><span class="bio-line__v bio-line__v--plain">' + c.tel + '</span></div>' : '') +
+      (c.office ? '<div class="bio-line"><span class="bio-line__k">Office</span><span class="bio-line__v bio-line__v--plain">' + c.office + '</span></div>' : '');
+
+    /* Education */
+    const edu = (p.education || []).map(e =>
+      pRow(e.y, '<b>' + (e.deg || '') + '</b> · ' + (e.org || ''), e.major, e.note)
+    ).join('');
+
+    /* Professional Experience — 타임라인 */
+    const exp = (p.experience || []).map(x =>
+      '<div class="ptimeline__row">' +
+        '<div class="plist__t"><b>' + x.role + '</b> · ' + x.org + '</div>' +
+        (x.unit ? '<div class="plist__s">' + x.unit + '</div>' : '') +
+        (x.period ? '<div class="plist__n">' + x.period + '</div>' : '') +
+      '</div>').join('');
+
+    /* Professional Activities */
+    const act = (sv.activities || []).slice().sort(byYearDesc).map(a =>
+      pRow(a.y, a.t, a.org, a.period)
+    ).join('');
+
+    /* Awards */
+    const awd = (sv.awards || []).slice().sort(byYearDesc).map(a =>
+      pRow(a.y, a.t, a.org, a.note)
+    ).join('');
+
+    /* Public Engagement & Advisory */
+    const eng = (prof.engagement || []).slice().sort(byYearDesc).map(e => {
+      const k = ENGAGE[String(e.kind || '').toLowerCase()] || { cls: 'pbadge--contrib', label: e.kind || '—' };
+      const title = e.link
+        ? '<a class="plist__link" href="' + e.link + '" target="_blank" rel="noopener">' + e.t + ' ↗</a>'
+        : e.t;
+      return pRow('<span class="pbadge ' + k.cls + '">' + k.label + '</span>', title,
+        [e.org, e.period].filter(Boolean).join(' · '), '');
+    }).join('');
+
+    /* Invited Talks — 껍데기만 만들고 renderTalks 가 채움 */
+    talkPage = 0;
+    const talkSec = prof.talks.length
+      ? '<div class="bio-sec"><div class="rel-head"><h3>Invited Talks</h3><div class="rel-pager" id="prof-talks-pager"></div></div>' +
+        '<div class="plist" id="prof-talks"></div></div>'
+      : '';
+
+    byId('bio-mount').innerHTML =
+      '<div class="bio-top">' +
+        '<div class="trail"><a data-view="view-members" data-jump="lead-prof">Members</a> › <span>' + (p.ko || p.en) + '</span></div>' +
+        '<button class="return bio-return" data-view="view-members" data-jump="lead-prof">← Members 목록으로</button>' +
+      '</div>' +
+      '<div class="bio-head">' + face +
+        '<div class="bio-id">' +
+          '<div class="bio-kicker">' + (p.role || '') + '</div>' +
+          '<h1>' + (p.ko || '') + '</h1>' +
+          (p.en ? '<div class="bio-en">' + p.en + '</div>' : '') +
+          (dept.length ? '<div class="prof-dept">' + dept.join('<br>') + '</div>' : '') +
+          contact +
+          profLinks(p) +
+        '</div>' +
+      '</div>' +
+      pSec('Education', edu ? '<div class="plist">' + edu + '</div>' : '') +
+      pSec('Professional Experience', exp ? '<div class="ptimeline">' + exp + '</div>' : '') +
+      pSec('Professional Activities', act ? '<div class="plist">' + act + '</div>' : '') +
+      talkSec +
+      pSec('Awards & Honors', awd ? '<div class="plist">' + awd + '</div>' : '') +
+      pSec('Public Engagement & Advisory', eng ? '<div class="plist">' + eng + '</div>' : '') +
+      '<button class="return" data-view="view-members" data-jump="lead-prof">← Back to Members</button>';
+
+    navigate('view-bio', null, null, { detail: 'professor' });
+    renderTalks();
+  }
+
+  /* ==========================================================================
      상세 — 멤버 페이지
      ========================================================================== */
   /* 멤버 직접 입력 논문(pubs) 한 줄 — a 저자, t 제목, v 게재정보, y 연도, d(선택) DOI */
@@ -890,6 +1081,7 @@
       if (extraState && extraState.detail === 'member' && extraState.id != null) {
         leaving.jump = 'mcard-' + extraState.id;
       }
+      if (extraState && extraState.detail === 'professor') leaving.jump = 'lead-prof';
       try { history.replaceState(leaving, ''); } catch (e) {}
       var st = Object.assign({ v: viewId, j: jumpId, f: filter }, extraState || {});
       try { history.pushState(st, '', viewToPath(viewId)); } catch (e) {}
@@ -900,7 +1092,7 @@
         const el = byId(jumpId);
         if (el) {
           /* 멤버 카드로 복귀(mcard-*)는 애니메이션 없이 즉시 이동, 그 외 섹션 점프는 부드럽게 */
-          if (jumpId.indexOf('mcard-') === 0) {
+          if (jumpId.indexOf('mcard-') === 0 || jumpId === 'lead-prof') {
             var de = document.documentElement, prev = de.style.scrollBehavior;
             de.style.scrollBehavior = 'auto';
             /* 이미 봤던 목록이므로 카드 등장(fade/slide) 애니메이션 없이 즉시 표시 */
@@ -964,6 +1156,7 @@
       const parts = relBtn.dataset.rel.split(':');
       const d = parts[1] === 'next' ? 1 : -1;
       if (parts[0] === 'pubs') { relState.pubsPage += d; renderRelPubs(); }
+      else if (parts[0] === 'talks') { talkPage += d; renderTalks(); }
       else { relState.projsPage += d; renderRelProjs(); }
       setTimeout(revealPass, 30);
       return;
@@ -986,6 +1179,12 @@
       const wasOpen = week.classList.contains('is-open');
       week.parentElement.querySelectorAll('.week.is-open').forEach(x => x.classList.remove('is-open'));
       if (!wasOpen) week.classList.add('is-open');
+      return;
+    }
+    const profCard = e.target.closest('[data-professor]');
+    if (profCard) {
+      e.preventDefault();
+      openProfessor();
       return;
     }
     const entry = e.target.closest('[data-entry]');
@@ -1367,6 +1566,21 @@
     members.forEach(m => { if (m.en) memberNames[normName(m.en)] = 1; });
     paintMembers();
 
+    /* 교수 — 4개 파일을 개별로 읽어 하나라도 없으면 그 섹션만 생략 */
+    Promise.all([
+      fetchJSON('members/professor/profile.json').catch(() => null),
+      fetchJSON('members/professor/service.json').catch(() => null),
+      fetchJSON('members/professor/talks.json').catch(() => []),
+      fetchJSON('members/professor/engagement.json').catch(() => [])
+    ]).then(([pf, sv, tk, en]) => {
+      prof.profile = pf;
+      prof.service = sv;
+      prof.talks = (tk || []).slice().sort(byYearDesc);
+      prof.engagement = en || [];
+      paintProfessorCard();
+      revealPass();
+    });
+
     /* 인턴(있으면 표시, 없으면 섹션 숨김) */
     fetchJSON('members/interns.json')
       .then(paintInterns)
@@ -1445,6 +1659,7 @@
     var st = e.state || {};
     suppressHistory = true;
     if (st.detail === 'member') openMember(st.id);
+    else if (st.detail === 'professor') openProfessor();
     else if (st.detail === 'article') openArticle(st.atype, st.id);
     else if (st.detail === 'research') openResearch(st.id);
     else navigate(st.v || pathToView(), st.jump || st.j, st.f);
