@@ -382,6 +382,23 @@
   }
   const byYearDesc = (a, b) => String(b.y || '').localeCompare(String(a.y || ''));
 
+  /* 발표 정렬 키 — date 가 있으면 date 기준(YYYYMMDD), 없으면 연도만 사용.
+     date 예: "2026.12.07 – 12.11", "2026-12-07", "Dec. 7–11, 2026", "12.07 – 12.11"(연도는 y 에서 보충) */
+  function talkKey(t) {
+    const d = String(t.date || '');
+    const y4 = /(\d{4})\D{1,3}(\d{1,2})(?:\D{1,3}(\d{1,2}))?/.exec(d);   // 연도가 앞에 오는 형식
+    if (y4) return y4[1] + pad2(y4[2]) + pad2(y4[3]);
+    const yTail = /(\d{1,2})\D{1,3}(\d{1,2})\D{1,3}(\d{4})/.exec(d);     // 연도가 뒤에 오는 형식
+    if (yTail) return yTail[3] + pad2(yTail[1]) + pad2(yTail[2]);
+    const yOnly = /(\d{4})/.exec(d);                                     // date 안에 연도만 있음
+    const base = yOnly ? yOnly[1] : (String(t.y || '').match(/\d{4}/) || [''])[0];
+    if (!base) return '00000000';
+    const md = /(?:^|\D)(\d{1,2})\D{1,3}(\d{1,2})(?:\D|$)/.exec(yOnly ? d.replace(yOnly[1], '') : d);
+    return base + (md ? pad2(md[1]) + pad2(md[2]) : '0000');
+  }
+  function pad2(v) { const n = parseInt(v, 10); return n ? (n < 10 ? '0' + n : String(n)) : '00'; }
+  const byTalkDateDesc = (a, b) => talkKey(b).localeCompare(talkKey(a));
+
   /* ---------- 메인 카드 (Members 화면 상단) ---------- */
   function paintProfessorCard() {
     const mount = byId('lead-prof');
@@ -1575,7 +1592,7 @@
     ]).then(([pf, sv, tk, en]) => {
       prof.profile = pf;
       prof.service = sv;
-      prof.talks = (tk || []).slice().sort(byYearDesc);
+      prof.talks = (tk || []).slice().sort(byTalkDateDesc);
       prof.engagement = en || [];
       paintProfessorCard();
       revealPass();
