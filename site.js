@@ -541,9 +541,9 @@
       pSec('Education', edu ? '<div class="plist">' + edu + '</div>' : '') +
       pSec('Professional Experience', exp ? '<div class="ptimeline">' + exp + '</div>' : '') +
       pSec('Professional Activities', act ? '<div class="plist">' + act + '</div>' : '') +
-      talkSec +
       pSec('Awards & Honors', awd ? '<div class="plist">' + awd + '</div>' : '') +
       pSec('Public Engagement & Advisory', eng ? '<div class="plist">' + eng + '</div>' : '') +
+      talkSec +
       '<button class="return" data-view="view-members" data-jump="lead-prof">← Back to Members</button>';
 
     navigate('view-bio', null, null, { detail: 'professor' });
