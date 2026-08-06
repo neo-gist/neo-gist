@@ -1,0 +1,83 @@
+{
+  "_comment": "CV 전용 정보 — 홈페이지에 공개되지 않고 거의 바뀌지 않는 항목만 여기서 관리합니다. 논문/발표/수상/특허/경력은 각각 ref.bib · talks.json · service.json · patents.json · profile.json 에서 자동으로 가져옵니다.",
+  "mobile": "+82-10-8502-2771",
+  "research_interests": [
+    {
+      "theme": "Process technologies for 2D material-based electronics/optoelectronics",
+      "items": [
+        "Process technology for 2D material-based device array and its application to logic circuits.",
+        "Strain and doping techniques for high-performance 2D material-based electronic and optoelectronic devices.",
+        "Reconfigurable FETs for logic and neuromorphic applications."
+      ]
+    },
+    {
+      "theme": "Heterostructure-based electronic and optoelectronic devices",
+      "items": [
+        "Polymer heterostructure-based phototransistors.",
+        "2D material-based van der Waals heterostructure for high-performance non-volatile memory devices.",
+        "Energy band engineering in van der Waals heterojunction for neuromorphic applications."
+      ]
+    },
+    {
+      "theme": "Development of neuromorphic devices and its applications in system level",
+      "items": [
+        "Polymer-electrolyte-based atomic switching device and logic gate circuit.",
+        "Synaptic/Neuronal devices based on polymer atomic switching device.",
+        "2D material-based optoelectronic synaptic device."
+      ]
+    }
+  ],
+  "referees": [
+    {
+      "name": "Prof. Dr. Jin-Hong Park",
+      "relation": "Ph.D. Advisor",
+      "affil": [
+        "Department of Electrical and Computer Engineering",
+        "SKKU Advanced Institute of Nanotechnology (SAINT)",
+        "Sungkyunkwan University"
+      ],
+      "email": "jhpark9@skku.edu"
+    },
+    {
+      "name": "Prof. Dr. Sungjoo Lee",
+      "relation": "Ph.D. Co-Advisor",
+      "affil": [
+        "Department of Electrical and Computer Engineering",
+        "SKKU Advanced Institute of Nanotechnology (SAINT)",
+        "Sungkyunkwan University"
+      ],
+      "email": "leesj@skku.edu"
+    },
+    {
+      "name": "Prof. Dr. Donguk Nam",
+      "relation": "Post-Doc. Supervisor",
+      "affil": [
+        "School of Electrical and Computer Engineering",
+        "Seoul National University"
+      ],
+      "email": "donguknam@snu.ac.kr"
+    }
+  ],
+  "journal_abbr": {
+    "ACS Applied Materials and Interfaces": "ACS Appl. Mater. Interfaces",
+    "ACS Nano": "ACS Nano",
+    "ACS Photonics": "ACS Photonics",
+    "Advanced Electronic Materials": "Adv. Electron. Mater.",
+    "Advanced Functional Materials": "Adv. Funct. Mater.",
+    "Advanced Materials": "Adv. Mater.",
+    "Advanced Science": "Adv. Sci.",
+    "Applied Physics Letters": "Appl. Phys. Lett.",
+    "Carbon": "Carbon",
+    "IEEE Electron Device Letters": "IEEE Electron Device Lett.",
+    "Journal of Materials Chemistry C": "J. Mater. Chem. C",
+    "Materials Research Bulletin": "Mater. Res. Bull.",
+    "Nano Letters": "Nano Lett.",
+    "Nanoscale": "Nanoscale",
+    "Nature Communications": "Nat. Commun.",
+    "Optics Express": "Opt. Express",
+    "Optics Letters": "Opt. Lett.",
+    "Organic Electronics": "Org. Electron.",
+    "Scientific Reports": "Sci. Rep.",
+    "npj 2D Materials and Applications": "npj 2D Mater. Appl."
+  }
+}
