@@ -430,8 +430,7 @@
           (eduLi ? '<div class="lp-cred"><h5>Education</h5><ul>' + eduLi + '</ul></div>' : '') +
         '</div>' +
         profLinks(p) +
-      '</div>' +
-      '<span class="lead-prof__more">See More →</span>';
+      '</div>';
   }
 
   /* ---------- Invited Talks — 5건씩 페이지 넘김 ---------- */
@@ -910,6 +909,10 @@
     var cv = byId('hl-covers-v');
     if (cv) { cv.innerHTML = journalsData.filter(p => p.cover).map(coverCellV).join(''); }  // 최신순(위→아래)
     revealPass();
+    /* 사용자가 Publications 를 먼저 열어둔 상태에서 데이터가 뒤늦게 도착한 경우,
+       그래프가 왼쪽(오래된 연도)에 멈춰 있고 커버 높이도 안 맞으므로 다시 초기화한다. */
+    var hv = byId('papersview-highlights');
+    if (hv && !hv.hidden) initHighlightsView();
   }
   /* 드래그로 가로 스크롤 */
   function dragScrollX(el) {
@@ -936,7 +939,11 @@
   /* Highlights 뷰가 보일 때 초기화: 그래프는 최신(오른쪽)부터, 커버 높이 맞춤 */
   function initHighlightsView() {
     var chart = byId('hl-cite-chart');
-    if (chart) { dragScrollX(chart); chart.scrollLeft = chart.scrollWidth; }
+    if (chart) {
+      dragScrollX(chart);
+      /* 아직 안 그려졌으면(scrollWidth 0) 건드리지 않는다 — 데이터 도착 후 다시 호출됨 */
+      if (chart.scrollWidth > chart.clientWidth) chart.scrollLeft = chart.scrollWidth;
+    }
     fitCovers();
     /* 화면 전환·폰트·이미지 로딩 때문에 레이아웃이 늦게 잡힐 수 있어 여러 번 재측정 */
     [60, 200, 500, 1000].forEach(function (t) { setTimeout(fitCovers, t); });
@@ -1080,8 +1087,30 @@
     if (set) set.classList.add('is-shown');
   }
 
+  /* 화면을 바꾼 뒤 맨 위로 올린다.
+     데이터가 늦게 도착해 콘텐츠 높이가 나중에 커지면 스크롤 위치가 엉킬 수 있으므로
+     약 1초 동안 몇 차례 다시 맨 위로 맞춘다. 사용자가 직접 스크롤하면 즉시 중단. */
+  var topHold = null;
+  function settleTop() {
+    var me = { alive: true };
+    if (topHold) topHold.alive = false;
+    topHold = me;
+    var EV = ['wheel', 'touchstart', 'keydown'];
+    var stop = function () { me.alive = false; };
+    EV.forEach(function (ev) { window.addEventListener(ev, stop, { passive: true }); });
+    var apply = function () { if (me.alive) window.scrollTo({ top: 0, behavior: 'auto' }); };
+    apply();
+    [50, 200, 500, 900].forEach(function (t) { setTimeout(apply, t); });
+    setTimeout(function () {
+      me.alive = false;
+      EV.forEach(function (ev) { window.removeEventListener(ev, stop); });
+    }, 1000);
+  }
+
   function navigate(viewId, jumpId, filter, extraState) {
     screens.forEach(s => s.classList.toggle('is-active', s.id === viewId));
+    /* 짧은 화면으로 바뀌면 브라우저가 스크롤을 아래로 붙여버리므로 즉시 맨 위로 올린다 */
+    if (!jumpId) settleTop();
     /* 상세 화면(bio/entry/research-detail)은 부모 탭을 현재 메뉴로 표시 */
     const key = VIEW_PARENT[viewId] || viewId;
     menuLinks.forEach(l => l.classList.toggle('is-current', l.dataset.view === key));
@@ -1126,8 +1155,6 @@
             el.scrollIntoView({ behavior: 'smooth', block: 'start' });
           }
         }
-      } else {
-        window.scrollTo({ top: 0, behavior: 'auto' });
       }
       revealPass();
     }, 50);

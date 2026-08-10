@@ -30,7 +30,9 @@ img{max-width:100%;display:block}
 
 /* ----- 레이아웃 뼈대 ----- */
 .container{max-width:1200px;margin:0 auto;padding:0 24px}
-.screen{display:none;animation:screen-in .45s ease}
+/* overflow-anchor:none — 데이터·이미지가 늦게 그려질 때 브라우저가 스크롤 위치를
+   자동 보정하면서 화면이 아래로 밀리는 현상을 막는다 */
+.screen{display:none;animation:screen-in .45s ease;overflow-anchor:none}
 .screen.is-active{display:block}
 @keyframes screen-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 
@@ -237,8 +239,6 @@ img{max-width:100%;display:block}
 .lead-prof:hover{box-shadow:var(--shadow-card)}
 .lead-prof:empty{display:none}
 .lead-prof__ko{font-weight:700;font-size:.7em;color:var(--night)}
-.lead-prof__more{position:absolute;right:34px;bottom:28px;font-size:13px;font-weight:700;color:var(--gray-2);transition:.18s}
-.lead-prof:hover .lead-prof__more{color:var(--accent-strong)}
 .lead-prof__photo{width:210px;aspect-ratio:3/4;border-radius:var(--rad-xl);background:linear-gradient(140deg,#2a2b28,#D42A1A);display:grid;place-items:center;color:#fff;font-family:var(--font-head);font-size:63px;font-weight:600;letter-spacing:-2px;position:relative;overflow:hidden}
 .lead-prof__photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .lead-prof__body h3{font-size:30px;font-weight:700;color:var(--night);letter-spacing:-0.6px}
@@ -678,7 +678,6 @@ a.paper__title--link:hover{color:var(--accent-strong);text-decoration:underline}
 .bio-sec .rel-head h3{margin-bottom:0}
 @media(max-width:720px){
   .plist__row{grid-template-columns:1fr;gap:6px}
-  .lead-prof__more{position:static;display:block;margin-top:18px}
 }
 
 .bio-story p{font-size:16px;line-height:1.85;color:var(--coal);margin:18px 0}
