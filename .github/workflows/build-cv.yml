@@ -1,0 +1,113 @@
+name: Build CV
+
+# CV 에 들어가는 데이터가 바뀌면 scripts/build-cv.py 로 CV(docx)를 다시 만들고,
+# LibreOffice 로 PDF 까지 변환해서 files/cv/ 에 커밋한다.
+# 아래 paths 에 적힌 파일이 바뀔 때만 실행된다.
+on:
+  push:
+    paths:
+      - 'data/members/professor/**'          # profile · service · talks · engagement · cv
+      - 'data/publications/ref.bib'          # 논문 목록
+      - 'data/publications/patents.json'     # 특허
+      - 'data/publications/jcr.json'         # JCR 상위 10% 표시
+      - 'files/cv/cv_template.docx'          # CV 양식(서식·정적 섹션)
+      - 'scripts/build-cv.py'                # 생성 규칙
+      - '.github/workflows/build-cv.yml'
+  workflow_dispatch:                         # Actions 탭에서 수동 실행("Run workflow")
+
+# 생성물을 커밋하고, 이전 CV 커밋을 덮어쓰기(amend) 위해 쓰기 권한 필요
+permissions:
+  contents: write
+
+# 연달아 저장하면 마지막 것만 실행 (진행 중이던 이전 실행은 취소)
+concurrency:
+  group: build-cv
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # amend 여부를 판단하려면 직전 커밋 정보가 필요하다.
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install python-docx
+        run: pip install --quiet python-docx==1.1.2
+
+      # 글꼴 준비
+      #  · fonts-nanum      : 없으면 PDF 의 한국어가 네모로 깨진다 (필수)
+      #  · fonts-liberation : Liberation Serif. Times New Roman 과 글자폭이 같은 무료 대체 글꼴
+      #  · ttf-mscorefonts-installer : 진짜 Times New Roman. 다운로드가 실패해도
+      #                                Liberation Serif 로 자동 대체되므로 빌드는 계속된다.
+      - name: Install fonts and LibreOffice
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq fonts-nanum fonts-liberation
+          echo "ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true" \
+            | sudo debconf-set-selections
+          sudo apt-get install -y -qq ttf-mscorefonts-installer \
+            || echo "::warning::Times New Roman 설치 실패 — Liberation Serif 로 대체됩니다"
+          if ! command -v soffice >/dev/null 2>&1; then
+            sudo apt-get install -y -qq libreoffice-writer
+          fi
+          fc-cache -f >/dev/null
+          echo "본문에 실제로 쓰이는 글꼴: $(fc-match 'Times New Roman')"
+
+      - name: Build CV (docx)
+        run: python3 scripts/build-cv.py
+
+      - name: Convert to PDF
+        run: |
+          soffice --headless --norestore \
+                  --convert-to pdf --outdir files/cv files/cv/donghokang.docx
+          test -s files/cv/donghokang.pdf
+
+      # docx/pdf 는 만들 때마다 파일 안의 생성시각이 달라져, 내용이 같아도 매번
+      # 새 파일로 취급된다. 그대로 쌓으면 저장소가 계속 커지므로,
+      # 직전 커밋이 이 워크플로가 만든 CV 커밋이면 새로 쌓지 않고 그 커밋을 덮어쓴다.
+      # 결과적으로 CV 커밋은 항상 1개만 남는다.
+      - name: Commit
+        env:
+          BOT: "github-actions[bot]@users.noreply.github.com"
+          MSG: "chore: rebuild CV [skip ci]"
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "$BOT"
+          git add files/cv/donghokang.docx files/cv/donghokang.pdf
+
+          if git diff --staged --quiet; then
+            echo "변경 없음 — 커밋 생략"
+            exit 0
+          fi
+
+          # 직전 커밋이 이 워크플로가 만든 것인지 확인
+          if [ "$(git log -1 --format=%s)" = "$MSG" ] && [ "$(git log -1 --format=%ae)" = "$BOT" ]; then
+            echo "이전 CV 커밋을 덮어씁니다 (저장소 용량 누적 방지)"
+            git commit --amend --no-edit
+            # --force-with-lease : 그 사이 다른 사람이 push 했으면 덮어쓰지 않고 실패한다
+            if git push --force-with-lease origin "HEAD:${GITHUB_REF_NAME}"; then
+              exit 0
+            fi
+            echo "다른 변경이 있어 덮어쓰기를 취소하고 새 커밋으로 전환합니다"
+            git reset --soft HEAD@{1} 2>/dev/null || true
+            git commit -m "$MSG" 2>/dev/null || true
+          else
+            git commit -m "$MSG"
+          fi
+
+          # 인용수 갱신 워크플로와 동시에 돌면 push 가 충돌할 수 있어 재시도한다.
+          for i in 1 2 3; do
+            git pull --rebase --autostash origin "${GITHUB_REF_NAME}" && git push && exit 0
+            echo "push 재시도 $i"
+            sleep 5
+          done
+          echo "::error::push 실패"
+          exit 1
