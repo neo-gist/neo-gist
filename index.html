@@ -34,6 +34,58 @@
 <link rel="icon" type="image/svg+xml" href="images/site/favicon.svg">
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <link rel="stylesheet" href="theme.css?rev=101">
+  <!-- 구조화 데이터(JSON-LD) — 검색엔진이 "강동호 교수 / GIST / NEO Lab"을 연결하도록 돕는 정보 -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "ResearchOrganization",
+      "@id": "https://donghokang.group/#lab",
+      "name": "Nano Electronics & Optoelectronics Laboratory",
+      "alternateName": ["NEO Lab", "강동호 교수 연구실", "광주과학기술원 나노 전자·광전소자 연구실", "GIST NEO Lab"],
+      "url": "https://donghokang.group/",
+      "logo": "https://donghokang.group/images/site/favicon.svg",
+      "image": "https://donghokang.group/images/site/hero-banner.jpg",
+      "description": "광주과학기술원(GIST) 반도체공학과 강동호 교수 연구실입니다. 2차원 반도체 기반 전자·광전소자, 뉴로모픽 소자, 인-센서 컴퓨팅을 연구합니다. Nano Electronics & Optoelectronics Laboratory (NEO Lab) at GIST.",
+      "parentOrganization": { "@id": "https://donghokang.group/#gist" },
+      "member": { "@id": "https://donghokang.group/#kang" },
+      "knowsAbout": ["2차원 반도체", "뉴로모픽 소자", "광전소자", "인-센서 컴퓨팅", "반도체 공정", "2D semiconductors", "neuromorphic devices", "optoelectronic devices", "in-sensor computing"]
+    },
+    {
+      "@type": "Person",
+      "@id": "https://donghokang.group/#kang",
+      "name": "Dong-Ho Kang",
+      "alternateName": "강동호",
+      "jobTitle": "Associate Professor",
+      "email": "mailto:donghokang@gist.ac.kr",
+      "url": "https://donghokang.group/",
+      "worksFor": { "@id": "https://donghokang.group/#gist" },
+      "affiliation": { "@id": "https://donghokang.group/#gist" },
+      "sameAs": [
+        "https://scholar.google.co.kr/citations?user=3Kmdb4UAAAAJ&hl=ko",
+        "https://www.linkedin.com/in/dong-ho-kang-75b5bb187/"
+      ]
+    },
+    {
+      "@type": "CollegeOrUniversity",
+      "@id": "https://donghokang.group/#gist",
+      "name": "Gwangju Institute of Science and Technology",
+      "alternateName": ["GIST", "광주과학기술원"],
+      "url": "https://www.gist.ac.kr/"
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://donghokang.group/#website",
+      "name": "NEO Lab — GIST",
+      "alternateName": ["강동호 교수 연구실", "Nano Electronics & Optoelectronics Lab"],
+      "url": "https://donghokang.group/",
+      "inLanguage": ["ko", "en"],
+      "publisher": { "@id": "https://donghokang.group/#lab" }
+    }
+  ]
+}
+</script>
 </head>
 <body>
 
