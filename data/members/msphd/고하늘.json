@@ -4,11 +4,10 @@
   "en": "Haneul Go",
   "init": "HG",
   "img": "gohaneul.jpg",
-  "role": "Undergraduate",
+  "role": "M.S./Ph.D. Student",
   "education": [
     "B.S., EECS, GIST (2026)"
   ],
-  "admit": "2022-09",
-  "note": "2026년 가을학기 석박통합과정 입학 예정",
+  "admit": "2026-09",
   "email": "skygo1023@gm.gist.ac.kr"
 }
