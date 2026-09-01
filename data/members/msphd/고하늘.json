@@ -1,0 +1,13 @@
+{
+  "id": "고하늘",
+  "ko": "고하늘",
+  "en": "Haneul Go",
+  "init": "HG",
+  "img": "gohaneul.jpg",
+  "role": "M.S./Ph.D. Student",
+  "education": [
+    "B.S., EECS, GIST (2026)"
+  ],
+  "admit": "2026-09",
+  "email": "skygo1023@gm.gist.ac.kr"
+}
