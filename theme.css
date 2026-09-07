@@ -365,7 +365,7 @@ img{max-width:100%;display:block}
 .paper{display:grid;grid-template-columns:108px 1fr;gap:20px;align-items:start;padding:22px 0;border-bottom:1px solid var(--line-2)}
 .paper:first-child{border-top:1px solid var(--line-2)}
 .paper__meta{font-family:var(--font-head);font-size:15px;font-weight:600;color:var(--charc);padding-top:2px;text-align:center}
-.paper__meta .chip{display:inline-block;margin-top:8px}
+.paper__meta .chip{display:block;width:fit-content;margin:8px auto 0}
 .pat-y{display:block}
 .paper__meta .pat-chip{display:block;width:fit-content;margin:8px auto 0}
 .pat-head{font-family:var(--font-head);font-size:20px;font-weight:600;color:var(--night);letter-spacing:-0.3px;margin:46px 0 18px}
