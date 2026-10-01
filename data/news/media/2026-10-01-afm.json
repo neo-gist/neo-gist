@@ -1,0 +1,12 @@
+{
+  "id": "2026-10-01-afm",
+  "posted": "2026-10-01",
+  "term": "Paper Published",
+  "title": "GIST-한양대, 빛의 세기에 따라 흐릿한 영상 더 또렷하게 만드는 반도체 기술 개발",
+  "hero": "2026-10-01-afm.jpg",
+  "blocks": [
+    { "p": "- GIST 강동호 교수팀·한양대 ERICA 오세용 교수팀, 망막의 신호 억제 기능에 착안해 빛의 세기에 따라 영상 신호 조절… 별도의 조명 조건 판단 없이 영상 대비 향상" },
+    { "p": "- 노이즈 영상 전처리로 인공신경망 인식 정확도 47.7% → 97.3% 향상 — 국제학술지 《Advanced Functional Materials》 게재" },
+    { "p": "Media in Korea: [전자신문](https://www.etnews.com/20261001000070), [베리스타알파](https://www.veritas-a.com/news/articleView.html?idxno=630096)" }
+  ]
+}
