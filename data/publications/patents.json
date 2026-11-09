@@ -1,6 +1,15 @@
 {
   "patents": [
     {
+      "id": "2026-optomemory-kr",
+      "y": "2026",
+      "region": "domestic",
+      "a": "강동호, 박소은, 백주환",
+      "t": "광전자 메모리 소자",
+      "app": "10-2026-0221397",
+      "reg": ""
+    },
+    {
       "id": "2026-bipolar-us",
       "y": "2026",
       "region": "intl",
