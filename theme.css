@@ -860,3 +860,11 @@ a.paper__title--link:hover{color:var(--accent-strong);text-decoration:underline}
   .hl-cite__n{display:inline;font-size:14px}
   .hl-cite__l{display:inline;margin:0 0 0 5px}
 }
+
+/* Home Lab News — 모바일: 뱃지·날짜 윗줄, 제목 아랫줄 */
+@media(max-width:560px){
+  .feed__row{flex-wrap:wrap;align-items:center;gap:6px 12px;padding:14px 0}
+  .feed__tagwrap{width:auto;flex:none}
+  .feed__date{order:2;font-size:13px}
+  .feed__title{order:3;flex:0 0 100%;font-size:15.5px;line-height:1.45}
+}
